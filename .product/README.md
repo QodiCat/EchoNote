@@ -1,18 +1,15 @@
-# EchoNote Product Context
+# EchoNote 产品上下文
 
-This directory holds current product intent and the workflow for maintaining it.
-It was initialized because the repository began with a product-definition task.
+本目录保存当前产品目标及其维护流程。由于仓库首次任务属于产品定义工作，因此
+初始化本目录。
 
-## Entry points
+## 文档入口
 
-- `product.md`: concise product target, scope, phase, and open decisions.
-- `start-prompt.md`: required process for future product, PRD, UI, commercial
-  scope, delivery-status, and acceptance work.
+- `product.md`：简明产品目标、范围、阶段和待确认决策。
+- `start-prompt.md`：后续产品、PRD、UI、商务范围、交付状态及验收工作的流程。
 
-## Current phase
+## 当前阶段
 
-Discovery / pre-implementation. No PRD, UI specification, milestone, commercial
-scope, or acceptance baseline has been approved yet.
+产品发现 / 实现前阶段。尚无已批准的 PRD、UI 规范、里程碑、商务范围或验收基线。
 
-Engineering facts remain in `AGENTS.md` and `.agents/`; do not duplicate detailed
-implementation documentation here.
+工程事实维护在 `AGENTS.md` 和 `.agents/` 中，不在此重复详细实现文档。

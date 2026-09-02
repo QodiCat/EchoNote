@@ -1,28 +1,26 @@
-# Technical Debt and Risks
+# 技术债与风险
 
-## Foundation gaps
+## 工程基础缺口
 
-- No source control metadata is present in this directory.
-- No technology stack or desktop framework has been selected.
-- No dependency, build, test, lint, formatting, or CI configuration exists.
-- No supported operating system or minimum version is approved.
-- No system-audio capture feasibility spike has been completed.
+- 尚未选择技术栈或桌面框架。
+- 没有依赖、构建、测试、Lint、格式化或 CI 配置。
+- 尚未批准支持的操作系统及最低版本。
+- 尚未完成系统音频捕获可行性验证。
 
-## Product and operational risks
+## 产品与运行风险
 
-- System-audio capture differs materially across Windows, macOS, and Linux.
-- Cloud transcription could expose sensitive audio and text; consent, provider,
-  region, encryption, retention, and deletion behavior are unresolved.
-- Local transcription affects download size, hardware requirements, latency, and
-  packaging; no performance target or representative hardware is defined.
-- Recording other people may trigger legal/consent requirements depending on the
-  user's jurisdiction and context; the product behavior is not yet specified.
-- Long recordings require explicit limits, crash recovery, disk-space handling,
-  and resumable transcription behavior.
+- Windows、macOS 和 Linux 的系统音频捕获方式差异较大。
+- 云端转录可能暴露敏感音频和文本；用户授权、供应商、区域、加密、保留和
+  删除规则尚未确定。
+- 本地转录会影响安装包体积、硬件要求、延迟和打包方式，目前没有性能目标或
+  代表性硬件基线。
+- 录制他人声音可能受到用户所在地和使用场景的法律或授权要求约束，产品行为
+  尚未定义。
+- 长时间录音需要明确时长限制、崩溃恢复、磁盘空间处理及断点转录策略。
 
-## Recommended retirement order
+## 建议解决顺序
 
-1. Approve initial platform, privacy boundary, and first-release workflow.
-2. Run a minimal system-audio capture spike on the target platform.
-3. Select the stack based on spike evidence and packaging constraints.
-4. Establish tests and CI with the first executable slice.
+1. 批准首发平台、隐私边界和首版使用流程。
+2. 在目标平台完成最小系统音频捕获验证。
+3. 根据验证结果和打包约束选择技术栈。
+4. 随首个可执行功能切片建立测试与 CI。

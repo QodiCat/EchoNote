@@ -1,58 +1,53 @@
-# EchoNote Product
+# EchoNote 产品说明
 
-## Product statement
+## 产品定位
 
-EchoNote is a desktop application that records audio played by the user's
-computer, transcribes that audio into text, and helps the user organize and review
-the resulting material.
+EchoNote 是一款桌面应用，用于录制电脑正在播放的系统声音、将音频转录为文字，
+并帮助用户整理和复盘转录内容。
 
-## User problem
+## 用户问题
 
-People who listen to meetings, lessons, interviews, calls, or other material on a
-computer need a reliable way to retain the spoken content as searchable text for
-later organization and reflection.
+用户在电脑上收听会议、课程、访谈、通话或其他内容时，需要可靠地保留其中的
+语音信息，并转换为便于搜索、整理和复盘的文字。
 
-## Current target outcome
+## 当前目标结果
 
-A user can intentionally start and stop a system-audio recording, see whether
-recording and transcription succeeded, access the transcript together with its
-source recording, and use the text for later review.
+用户可以主动开始和停止系统声音录制，明确获知录制及转录是否成功，查看与原始
+录音关联的转录文本，并用这些文字完成后续复盘。
 
-## Status
+## 当前状态
 
-- Phase: discovery / pre-implementation.
-- Current implementation: none.
-- Approved feature package: none.
-- UI baseline: none.
-- Acceptance baseline: none.
-- Commercial scope and delivery date: not defined.
+- 阶段：产品发现 / 实现前。
+- 当前实现：无。
+- 已批准功能包：无。
+- UI 基线：无。
+- 验收基线：无。
+- 商务范围和交付日期：未定义。
 
-## Candidate first-release boundary (not yet approved)
+## 首版候选边界（尚未批准）
 
-- One supported desktop operating system.
-- Manual start/stop of system-audio recording.
-- Post-recording transcription with timestamps.
-- Local recording/transcript library and basic text export.
-- Clear recording, processing, success, and failure states.
+- 支持一个桌面操作系统。
+- 手动开始和停止系统声音录制。
+- 录制完成后生成带时间戳的转录文本。
+- 提供本地录音与转录列表以及基础文本导出。
+- 清晰展示录制中、处理中、成功和失败状态。
 
-This is a proposal for product discovery, not authorization to implement.
+以上内容只用于产品讨论，不代表已经授权开发。
 
-## Decisions required before implementation
+## 实现前必须确认的决策
 
-- Initial operating system and minimum version.
-- Whether microphone audio is excluded, optional, or mixed into recordings.
-- Local transcription, cloud transcription, or a selectable hybrid.
-- Languages, accuracy expectations, maximum recording length, and latency target.
-- Required organization features: title, tags, search, summaries, notes, or folders.
-- Export formats and whether audio must remain playable in the application.
-- Privacy, consent notice, storage, cloud transfer, retention, and deletion policy.
-- Offline expectations, account requirement, monetization, and release channel.
+- 首发操作系统及最低版本。
+- 是否排除、可选启用或混合录制麦克风声音。
+- 使用本地转录、云端转录还是可切换的混合方案。
+- 支持语言、准确率预期、最长录制时间和处理时延目标。
+- 首版是否需要标题、标签、搜索、摘要、笔记或文件夹。
+- 导出格式，以及是否需要在应用内播放原始音频。
+- 隐私、录制授权提示、存储、云端传输、保留和删除政策。
+- 离线要求、账号要求、商业模式和发布渠道。
 
-## Product principles
+## 产品原则
 
-- Recording must always be deliberate and visibly indicated.
-- Failures and partial transcripts must be explicit and recoverable.
-- Sensitive audio and transcripts should stay local unless the user knowingly
-  enables a documented cloud workflow.
-- Product targets must not be presented as implemented behavior until verified in
-  code and tests.
+- 录制必须由用户主动触发，并持续提供明显状态提示。
+- 失败和不完整转录必须明确展示且支持恢复。
+- 除非用户明确启用已有说明的云端流程，敏感音频和文字应保留在本地。
+- 未经代码和测试验证的产品目标不得描述为已经实现。

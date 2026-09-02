@@ -1,43 +1,37 @@
-# Architecture Context
+# 架构上下文
 
-## Current implementation
+## 当前实现
 
-There is no application implementation yet. As of 2026-09-02, the repository has
-no source tree, package/dependency manifest, build configuration, CI workflow,
-test framework, deployment setup, or Git metadata.
+当前没有应用实现。截至 2026-09-02，仓库已初始化 Git，但不存在源码目录、依赖
+清单、构建配置、CI、测试框架或部署配置。
 
-## Intended system boundary
+## 目标系统边界
 
-The product target requires three high-level capabilities:
+产品目标包含三个高层能力：
 
-1. Capture audio being played by the user's computer.
-2. Convert captured audio into a time-aligned text transcript.
-3. Let the user organize and revisit recordings and transcripts.
+1. 捕获用户电脑正在播放的声音。
+2. 将捕获的音频转换为带时间信息的文字。
+3. 帮助用户整理和复盘录音及转录内容。
 
-These are product-level boundaries, not selected modules or technologies. The
-desktop framework, supported operating systems, audio capture APIs, transcription
-provider/model, persistence layer, and packaging strategy remain undecided.
+这些只是产品能力边界，不代表已经选定模块或技术。桌面框架、支持的操作系统、
+音频捕获 API、转录服务或模型、持久化方式和打包方案均未决定。
 
-## Decision constraints
+## 技术决策约束
 
-- Audio capture is operating-system-specific and must be validated on each
-  supported platform before a framework is selected.
-- Recording, transcription, storage, and review should have explicit boundaries
-  so that provider or platform changes do not spread through the whole app.
-- Microphone capture must not be assumed to be equivalent to system-audio capture.
-- Transcription failures must be visible and retryable; never report an empty or
-  partial transcript as a successful completion.
-- Raw audio and transcript data are sensitive local user data. Architecture must
-  specify consent, storage location, retention, deletion, and any cloud transfer.
+- 系统音频捕获依赖操作系统；选择框架前必须在每个目标平台进行验证。
+- 录音、转录、存储和复盘应保持清晰边界，避免平台或供应商变化影响整个应用。
+- 不得把麦克风采集视为等同于系统声音采集。
+- 转录失败必须可见且可重试，不能把空白或不完整转录报告为成功。
+- 原始音频和转录文本属于敏感用户数据；架构必须明确授权、存储位置、保留、
+  删除以及云端传输规则。
 
-## Pending architecture decisions
+## 待确定的架构决策
 
-- Initial operating system and minimum supported version.
-- Local-only versus cloud-assisted transcription.
-- Live streaming versus post-recording transcription for the first release.
-- Desktop framework and language.
-- Local data format/database, search needs, and export formats.
-- Installer, code signing, auto-update, telemetry, and crash-reporting policy.
+- 首发操作系统及最低支持版本。
+- 使用纯本地转录还是云端辅助转录。
+- 首版采用实时转录还是录制完成后转录。
+- 桌面框架与编程语言。
+- 本地文件或数据库方案、搜索需求和导出格式。
+- 安装包、代码签名、自动更新、遥测和崩溃报告策略。
 
-Record accepted decisions as ADRs under `.agents/decisions/` when implementation
-begins; do not create placeholder ADRs.
+实现开始后，将已批准的决策记录到 `.agents/decisions/`；不要创建空白 ADR。

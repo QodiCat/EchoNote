@@ -1,21 +1,18 @@
-# Testing and Verification
+# 测试与验证
 
-## Current state
+## 当前状态
 
-No test framework, test files, lint configuration, build pipeline, or CI exists.
-Consequently, there are currently no runnable install, development, test, lint,
-or build commands.
+目前不存在测试框架、测试文件、Lint 配置、构建流水线或 CI，因此没有可运行的
+安装、开发、测试、Lint 或构建命令。
 
-## Required quality gates before implementation grows
+## 实现扩展前应建立的质量门槛
 
-- Unit tests for recording state, transcription job state, and persistence logic.
-- Integration tests around the chosen OS audio-capture boundary.
-- Contract tests for any remote transcription provider, without real credentials
-  in source control.
-- Failure-path coverage for permission denial, missing audio devices, interrupted
-  recordings, provider errors, retries, and low disk space.
-- Packaging smoke tests on every officially supported operating system.
-- Manual audio fixtures must contain no private or copyrighted meeting content.
+- 覆盖录音状态、转录任务状态和持久化逻辑的单元测试。
+- 覆盖所选操作系统音频捕获边界的集成测试。
+- 为远程转录服务建立契约测试，真实凭据不得进入源码仓库。
+- 覆盖权限拒绝、找不到音频设备、录制中断、转录服务失败、重试和磁盘不足。
+- 在所有正式支持的操作系统上执行打包冒烟测试。
+- 人工音频测试素材不得包含私人内容或受版权保护的会议内容。
 
-When a toolchain is selected, document exact commands in both this file and the
-root `AGENTS.md`, using configuration and CI as the source of truth.
+技术栈确定后，必须以配置和 CI 为事实来源，在本文件及根目录 `AGENTS.md` 中
+同步记录准确命令。

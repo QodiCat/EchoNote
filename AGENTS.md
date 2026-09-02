@@ -1,57 +1,51 @@
-# EchoNote Engineering Guide
+# EchoNote 工程指南
 
-## Project
+## 项目简介
 
-EchoNote is a planned desktop application for recording computer system audio,
-transcribing it into text, and organizing the transcript for later review.
-The repository currently contains context documents only; no application code,
-toolchain, dependency manifest, CI, or deployment configuration exists yet.
+EchoNote 是一款规划中的桌面应用，用于录制电脑系统声音、将音频转录为文字，
+并帮助用户整理和复盘转录内容。
 
-## Sources of truth
+当前仓库只有上下文文档，尚无应用代码、技术栈、依赖清单、CI 或部署配置。
 
-- Code, configuration, tests, and CI describe the current implementation.
-- Approved documents under `.product/` describe the product target.
-- `Documents/` is historical/supporting material and is not authoritative alone.
-- When implementation and product intent differ, record both; do not silently
-  change one to match the other.
+## 事实来源
 
-## Commands
+- 代码、配置、测试和 CI 描述当前实现。
+- `.product/` 下已批准的文档描述产品目标。
+- `Documents/` 只作为历史或补充材料，不能单独作为当前事实来源。
+- 当前实现与产品目标冲突时，应分别记录，不能擅自修改其中一方以保持一致。
 
-- Install: none.
-- Development: none.
-- Test: none.
-- Lint: none.
-- Build: none.
+## 工程命令
 
-Do not invent commands. Add them here only after introducing and verifying the
-corresponding configuration or CI workflow.
+- 安装：无。
+- 开发：无。
+- 测试：无。
+- Lint：无。
+- 构建：无。
 
-## Global constraints
+不得猜测命令。只有对应配置或 CI 已建立并经过验证后，才能在此添加命令。
 
-- Keep hand-written source files near or below 500 lines; split by responsibility.
-- Keep each directory focused on one domain; avoid generic dumping grounds.
-- Extend an existing capability instead of creating parallel implementations.
-- Remove dead code and obsolete configuration when changing related behavior.
-- Store runtime configuration in `.env`; never hard-code URLs, ports, tokens,
-  secrets, or other environment-specific values.
-- Do not use long-lived mocks, fake production data, silent fallbacks, swallowed
-  errors, or default-success behavior.
-- Update tests and relevant context documents with functional changes.
-- Do not delete tests, weaken validation, or bypass CI to make changes pass.
-- Never persist raw recordings or transcripts beyond the documented retention
-  policy once that policy is approved.
+## 全局约束
 
-## Context index
+- 手写源码文件原则上不超过 500 行，超过时按职责拆分。
+- 一个目录只负责一个业务领域，避免形成万能目录。
+- 优先扩展已有能力，不创建职责重复的平行实现。
+- 修改相关功能时清理废弃代码和无用配置。
+- 运行配置统一使用 `.env`，不得硬编码 URL、端口、Token、密钥或环境值。
+- 不使用长期 Mock、生产环境假数据、静默降级、吞异常或默认成功行为。
+- 功能变化必须同步测试和相关上下文文档。
+- 不得通过删除测试、降低校验或绕过 CI 使变更通过。
+- 数据保留策略批准后，不得超期保存原始录音或转录文本。
 
-- `.agents/architecture.md`: current architecture facts and decision boundaries.
-- `.agents/testing.md`: present verification state and future quality gates.
-- `.agents/technical-debt.md`: known gaps, risks, and unresolved engineering work.
-- `.product/README.md`: product documentation entry and current phase.
-- `.product/product.md`: concise approved target and open product decisions.
-- `.product/start-prompt.md`: workflow for future product and acceptance work.
+## 上下文索引
 
-## Definition of done
+- `.agents/architecture.md`：当前架构事实和技术决策边界。
+- `.agents/testing.md`：当前验证状态和未来质量门槛。
+- `.agents/technical-debt.md`：已知缺口、风险和待解决工程问题。
+- `.product/README.md`：产品文档入口和当前阶段。
+- `.product/product.md`：产品目标和待确认决策。
+- `.product/start-prompt.md`：后续产品及验收工作的启动流程。
 
-A change is complete when its behavior is implemented, relevant checks pass,
-errors remain observable, configuration is documented, and affected engineering
-and product context is synchronized. Report checks that cannot run and why.
+## 完成标准
+
+行为已实现、相关检查通过、错误可观察、配置已记录，并且受影响的工程与产品
+上下文已经同步，变更才算完成。无法运行的检查必须说明原因。

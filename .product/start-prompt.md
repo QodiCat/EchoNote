@@ -1,21 +1,17 @@
-# Product Work Start Prompt
+# 产品工作启动提示词
 
-Use this workflow whenever a task concerns product definition, PRD, UI,
-commercial scope, delivery status, or acceptance.
+任务涉及产品定义、PRD、UI、商务范围、交付状态或验收时，执行以下流程：
 
-1. Read `AGENTS.md` and the relevant `.agents/` engineering facts first.
-2. Read `.product/README.md` and `.product/product.md` completely.
-3. Separate verified current implementation from proposed or approved targets.
-4. Inspect any relevant approved feature package before editing product scope.
-5. For a new product request, update the smallest authoritative product document;
-   do not create duplicate PRDs or promote historical notes automatically.
-6. Mark assumptions and proposals clearly. Ask only for decisions that materially
-   alter scope, privacy, platform support, delivery, or acceptance.
-7. Do not implement business functionality during product-definition work unless
-   the user explicitly authorizes implementation after the target is clear.
-8. End with the current phase, decisions made, unresolved blockers, acceptance
-   implications, and the smallest next deliverable.
+1. 首先阅读 `AGENTS.md` 和相关 `.agents/` 工程事实。
+2. 完整阅读 `.product/README.md` 和 `.product/product.md`。
+3. 区分已验证的当前实现、产品提案和已批准目标。
+4. 修改产品范围前，检查相关且已经批准的功能包。
+5. 收到新产品需求时，只更新最小的权威产品文档；不要创建重复 PRD，也不要
+   自动把历史说明提升为当前要求。
+6. 明确标记假设和提案。只有平台、隐私、范围、交付或验收发生实质变化时，
+   才要求用户作出决策。
+7. 产品定义期间不开发业务功能，除非目标明确后用户另行授权实施。
+8. 工作结束时说明当前阶段、已确定决策、未解决问题、验收影响和最小下一步。
 
-For EchoNote's current discovery phase, the next product deliverable should be a
-small first-release brief that confirms platform, audio sources, transcription
-privacy boundary, core review workflow, and measurable acceptance criteria.
+EchoNote 当前处于产品发现阶段。下一份产品交付物应是精简的首版说明，用于确认
+首发平台、音频来源、转录隐私边界、核心复盘流程和可度量验收标准。
