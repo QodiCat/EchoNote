@@ -2,7 +2,7 @@
 
 ## UI 资产清单
 
-当前尚无已批准 UI 资产。涉及桌面交互的功能暂记为 `UI-TBD`，不得据此开始开发。
+当前尚无已批准 UI 资产。当前进入 UI 设计阶段；涉及桌面交互的功能暂记为 `UI-TBD`，不得据此开始开发。
 
 ## 追踪矩阵
 
@@ -13,4 +13,3 @@
 | P1-03 | UI-TBD | 待定 | 待定 | 待定 | Markdown/录音目录待定 | AC-03, AC-04 | architecture/testing |
 | P1-04 | UI-TBD | 待定 | 待定 | 本地文件删除待定 | 录音与 Markdown | AC-07 | architecture/testing |
 | P1-05 | UI-TBD | 待定 | 待定 | 更新服务待定 | 配置目录待定 | AC-08, AC-09 | architecture/testing |
-

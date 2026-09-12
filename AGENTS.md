@@ -38,6 +38,7 @@ EchoNote 是规划中的 Windows 桌面端实时录音转录软件：用户主�
 - `.agents/architecture.md`：架构事实与待决技术边界。
 - `.agents/testing.md`：验证现状与质量门槛。
 - `.agents/technical-debt.md`：当前缺口与风险。
+- `.agents/ui-design.md`：当前 UI 设计阶段、边界、门禁和产物。
 - `.product/README.md`：产品入口与阶段。
 - `.product/requirements-intake.md`：本轮需求事实、假设与待澄清项。
 - `.product/start-prompt.md`：产品工作与开发门禁。
