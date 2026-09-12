@@ -4,7 +4,7 @@
 
 EchoNote 是规划中的 Windows 桌面端实时录音转录软件：用户主动开始后读取电脑播放的音频，停止后将音频处理为文本，并支持保存为 Markdown。
 
-当前仓库处于产品发现与工程初始化阶段，尚无源码、依赖、技术栈、构建、测试或 CI 配置。
+当前仓库已进入 UI 优先的 MVP 开发阶段，采用 Electron + 原生 HTML/CSS/JS；火山引擎 STT 通过服务端代理接入。
 
 ## 事实来源
 
@@ -15,11 +15,11 @@ EchoNote 是规划中的 Windows 桌面端实时录音转录软件：用户主�
 
 ## 工程命令
 
-- 安装：无
-- 开发：无
-- 测试：无
-- Lint：无
-- 构建：无
+- 安装：`npm install`
+- 开发：`npm run dev`
+- 测试：`npm test`
+- Lint：`npm run lint`
+- 构建：`npm run build`
 
 不得猜测命令；只有建立并验证对应配置后才能补充。
 

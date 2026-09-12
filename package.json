@@ -1,0 +1,26 @@
+{
+  "name": "echonote",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A focused Windows desktop recorder for system audio transcription.",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "test": "node --check electron/main.js && node --check electron/preload.js && node --check src/renderer.js",
+    "lint": "node --check electron/main.js && node --check electron/preload.js && node --check src/renderer.js",
+    "build": "electron-builder --win --x64"
+  },
+  "devDependencies": {
+    "electron": "^38.1.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.echonote.desktop",
+    "productName": "EchoNote",
+    "files": ["electron/**/*", "src/**/*", "package.json"],
+    "win": {
+      "target": "portable"
+    }
+  }
+}

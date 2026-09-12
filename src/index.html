@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EchoNote</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div class="brand"><span class="brand-mark">E</span><span>EchoNote</span></div>
+        <div class="sidebar-copy"><span class="eyebrow">FOCUS MODE</span><h1>把声音，<br /><em>留成文字。</em></h1><p>录下电脑正在播放的内容，安静地整理成一份属于你的笔记。</p></div>
+        <div class="sidebar-footer"><span class="signal-dot"></span><span>本地优先 · 安全保存</span></div>
+      </aside>
+      <section class="workspace">
+        <header class="topbar"><div><span class="eyebrow">TODAY</span><h2>开始一段新的记录</h2></div><button id="settingsButton" class="icon-button" aria-label="打开设置">⚙</button></header>
+        <div id="setupBanner" class="setup-banner hidden"><span class="banner-icon">⌂</span><div><strong>先设置保存位置</strong><span>录音和 Markdown 会保存在同一个文件夹。</span></div><button id="setupButton" class="text-button">选择目录</button></div>
+        <section id="record-card" class="record-card">
+          <div class="record-card-top"><span id="statusPill" class="status-pill"><span class="status-dot"></span> READY</span><span id="recordingTimer" class="timer">00:00</span></div>
+          <div class="record-center"><div id="orb" class="orb"><div class="orb-core">◉</div></div><h3 id="recordTitle">准备好开始了吗？</h3><p id="recordHint">点击下方按钮，EchoNote 只会捕获电脑播放的系统声音。</p></div>
+          <div class="record-actions"><button id="recordButton" class="record-button"><span id="recordButtonIcon">●</span><span id="recordButtonText">开始录音</span></button><button id="stopButton" class="stop-button" disabled>停止录音</button></div>
+        </section>
+        <section class="bottom-grid">
+          <div class="panel"><div class="panel-heading"><div><span class="eyebrow">OUTPUT</span><h3>输出偏好</h3></div><span class="panel-icon">✦</span></div><label class="switch-row"><span><strong>Markdown 时间戳</strong><small>在文本中保留记录时间</small></span><input id="timestampToggle" type="checkbox" /><span class="switch"></span></label><div class="folder-row"><span class="folder-icon">⌂</span><div class="folder-copy"><small>保存到</small><strong id="folderPath">尚未设置保存目录</strong></div><button id="folderButton" class="small-button">更改</button></div></div>
+          <div class="panel"><div class="panel-heading"><div><span class="eyebrow">ACTIVITY</span><h3>最近一次记录</h3></div><span id="activityStatus" class="activity-label">暂无记录</span></div><div id="activityEmpty" class="activity-empty"><span class="empty-icon">☼</span><p>完成第一次录音后，<br />结果会出现在这里。</p></div><div id="activityResult" class="activity-result hidden"><div class="result-icon">✓</div><div><strong id="resultTitle">转录完成</strong><small id="resultDetail"></small></div><button id="deleteButton" class="delete-button">删除</button></div></div>
+        </section>
+        <footer class="privacy-note"><span>◈</span> 音频只会短暂经过转录代理，录音与文字最终保存在本地。</footer>
+      </section>
+    </main>
+    <div id="toast" class="toast" role="status"></div>
+    <script src="./renderer.js"></script>
+  </body>
+</html>

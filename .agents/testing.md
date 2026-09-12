@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-尚无可运行的安装、开发、测试、Lint、构建命令，也没有测试框架或 CI。当前处于 UI 设计确认阶段。
+已建立 Node/Electron 脚本：`npm test` 和 `npm run lint` 执行 JavaScript 语法检查；`npm run dev` 启动桌面 MVP；`npm run build` 依赖 Electron Builder。依赖安装和真实 Windows 音频捕获尚未验证。
 
 ## 首版质量门槛
 
