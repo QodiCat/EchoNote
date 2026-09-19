@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-已建立 Node/Electron 脚本：`npm test` 和 `npm run lint` 执行 JavaScript 语法检查；`npm run dev` 启动桌面 MVP；`npm run build` 依赖 Electron Builder。依赖安装和真实 Windows 音频捕获尚未验证。
+已建立 Node/Electron 脚本：`npm test` 和 `npm run lint` 执行 JavaScript 语法检查；`npm run dev` 启动桌面 MVP；`npm run proxy:start` 启动代理；`npm run build` 依赖 Electron Builder。代理健康检查已通过，真实火山引擎音频和 Windows 音频捕获尚未验证。
 
 ## 首版质量门槛
 

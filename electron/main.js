@@ -53,6 +53,23 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('get-proxy-status', () => ({ configured: Boolean(process.env.ECHONOTE_PROXY_URL) }));
+  ipcMain.handle('transcribe-recording', async (_event, { buffer, includeTimestamps }) => {
+    const proxyUrl = process.env.ECHONOTE_PROXY_URL;
+    if (!proxyUrl) throw new Error('服务端代理尚未配置');
+    const response = await fetch(`${proxyUrl.replace(/\/$/, '')}/v1/transcriptions`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'audio/ogg',
+        'x-echonote-language': 'zh-en',
+        'x-echonote-timestamps': String(Boolean(includeTimestamps))
+      },
+      body: Buffer.from(buffer),
+      signal: AbortSignal.timeout(120000)
+    });
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload?.error?.message || '转录失败');
+    return payload;
+  });
   createWindow();
   app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
 });

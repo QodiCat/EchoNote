@@ -27,9 +27,7 @@ function stopRecording() { if (state.recorder?.state === 'recording') { window.c
 async function finishRecording() {
   const blob = new Blob(state.chunks, { type: 'audio/webm' }); state.recorder = null; setStatus('PROCESSING'); $('recordTitle').textContent = '录音已完成'; $('recordHint').textContent = '正在准备转录，请稍候。'; $('recordButton').disabled = true; $('stopButton').disabled = true;
   try {
-    // The proxy endpoint is intentionally not called from the renderer. It will be wired through the main process after its contract is finalized.
-    const transcript = '转录服务尚未连接。完成服务端代理配置后，这里会显示本次录音的文本。';
-    const buffer = await blob.arrayBuffer(); const baseName = `echonote-${new Date().toISOString().replace(/[:.]/g, '-')}`;
+    const buffer = await blob.arrayBuffer(); const transcriptResult = await window.echoNote.transcribeRecording({ buffer, includeTimestamps: $('timestampToggle').checked }); const transcript = transcriptResult.text; const baseName = `echonote-${new Date().toISOString().replace(/[:.]/g, '-')}`;
     state.lastFiles = await window.echoNote.saveRecording({ directory: state.directory, buffer, baseName, transcript, includeTimestamps: $('timestampToggle').checked });
     $('activityEmpty').classList.add('hidden'); $('activityResult').classList.remove('hidden'); $('activityStatus').textContent = '已保存'; $('resultDetail').textContent = state.lastFiles.markdownPath; setStatus('SAVED'); $('recordTitle').textContent = '已保存到本地'; $('recordHint').textContent = '你可以开始下一段记录。'; toast('录音和 Markdown 已保存');
   } catch (error) { setStatus('ERROR'); $('recordTitle').textContent = '本次转录失败'; $('recordHint').textContent = '本次录音已结束，请重新点击开始录音。'; toast(error.message || '保存失败'); }

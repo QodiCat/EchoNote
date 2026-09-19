@@ -5,4 +5,5 @@ contextBridge.exposeInMainWorld('echoNote', {
   saveRecording: (payload) => ipcRenderer.invoke('save-recording', payload),
   deleteRecording: (payload) => ipcRenderer.invoke('delete-recording', payload),
   getProxyStatus: () => ipcRenderer.invoke('get-proxy-status')
+  ,transcribeRecording: (payload) => ipcRenderer.invoke('transcribe-recording', payload)
 });

@@ -7,6 +7,7 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron .",
+    "proxy:start": "node server/index.js",
     "test": "node --check electron/main.js && node --check electron/preload.js && node --check src/renderer.js",
     "lint": "node --check electron/main.js && node --check electron/preload.js && node --check src/renderer.js",
     "build": "electron-builder --win --x64"
