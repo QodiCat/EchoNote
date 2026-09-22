@@ -29,7 +29,23 @@
       </section>
     </main>
     <div id="toast" class="toast" role="status"></div>
+    <dialog id="settingsDialog" class="settings-dialog" aria-labelledby="settingsTitle">
+      <form id="shortcutForm">
+        <div class="settings-heading"><h2 id="settingsTitle">设置</h2><button id="closeSettings" type="button" class="icon-button" aria-label="关闭设置">×</button></div>
+        <h3>录音快捷键</h3>
+        <p class="settings-help">保存后全局生效，应用在后台时也可使用。触发后会显示录音窗口。</p>
+        <label for="startShortcut">开始录音</label>
+        <input id="startShortcut" type="text" placeholder="例如 Ctrl+Alt+R" maxlength="80" autocomplete="off" spellcheck="false" aria-describedby="shortcutHelp" />
+        <label for="stopShortcut">结束录音</label>
+        <input id="stopShortcut" type="text" placeholder="例如 Ctrl+Alt+S" maxlength="80" autocomplete="off" spellcheck="false" aria-describedby="shortcutHelp" />
+        <p id="shortcutHelp" class="settings-help">输入组合键名称：Ctrl / Alt / Shift + 字母、数字或 F1–F24，必须包含 Ctrl 或 Alt。留空并保存即可关闭对应快捷键。</p>
+        <p id="shortcutError" class="settings-error" role="alert"></p>
+        <div class="settings-actions"><button id="settingsFolder" type="button" class="small-button">更改保存目录</button><button id="saveShortcuts" type="submit" class="record-button">保存快捷键</button></div>
+      </form>
+    </dialog>
+    <link rel="stylesheet" href="./settings.css" />
     <script src="./audio-format.js"></script>
     <script src="./renderer.js"></script>
+    <script src="./settings.js"></script>
   </body>
 </html>

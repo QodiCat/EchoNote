@@ -9,7 +9,7 @@
     "dev": "electron .",
     "proxy:start": "node server/index.js",
     "test": "node --check electron/main.js && node --check electron/preload.js && node --check src/renderer.js && node --test tests/*.test.js",
-    "lint": "node --check electron/main.js && node --check electron/preload.js && node --check src/renderer.js",
+    "lint": "node --check electron/main.js && node --check electron/preload.js && node --check electron/shortcuts.js && node --check src/renderer.js && node --check src/settings.js",
     "build": "electron-builder --win --x64"
   },
   "devDependencies": {

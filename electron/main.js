@@ -1,4 +1,5 @@
-const { app, BrowserWindow, dialog, ipcMain, session, desktopCapturer } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, session, desktopCapturer, globalShortcut } = require('electron');
+const { createShortcuts } = require('./shortcuts');
 const { createDisplayMediaHandler } = require('./display-media');
 const fs = require('node:fs/promises');
 const path = require('node:path');
@@ -9,6 +10,23 @@ if (!app.isPackaged) {
 }
 
 let mainWindow;
+let shortcuts;
+
+async function runRecordingShortcut(action) {
+  if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.show();
+  mainWindow.focus();
+  const script = action === 'start'
+    ? "if (!document.getElementById('settingsDialog').open) document.getElementById('recordButton').click();"
+    : "document.getElementById('stopButton').click();";
+  try {
+    // This invocation originates from a real user keyboard gesture.
+    await mainWindow.webContents.executeJavaScript(script, true);
+  } catch {
+    dialog.showErrorBox('快捷键操作失败', '无法执行录音操作，请返回主界面重试。');
+  }
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -31,7 +49,14 @@ function createWindow() {
   mainWindow.loadFile(path.join(__dirname, '..', 'src', 'index.html'));
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  shortcuts = createShortcuts({ registry: globalShortcut, filePath: path.join(app.getPath('userData'), 'shortcuts.json'), dispatch: runRecordingShortcut });
+  await shortcuts.initialize();
+  ipcMain.handle('get-shortcuts', () => shortcuts.get());
+  ipcMain.handle('save-shortcuts', async (_event, settings) => {
+    try { return { settings: await shortcuts.update(settings) }; }
+    catch (error) { return { error: error.message }; }
+  });
   ipcMain.handle('select-output-directory', async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
       properties: ['openDirectory', 'createDirectory'],
@@ -79,3 +104,4 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+app.on('will-quit', () => shortcuts?.dispose());
