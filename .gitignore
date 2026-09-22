@@ -3,3 +3,6 @@ dist/
 dist-build/
 .electron-builder-cache/
 *.log
+.env
+.env.*
+!.env.example
