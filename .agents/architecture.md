@@ -1,26 +1,25 @@
 # 架构上下文
 
+核对日期：2026-09-22。实现事实不代表产品批准或验收完成。
+
 ## 当前实现
 
-当前已建立 Electron + 原生 HTML/CSS/JS 的桌面 MVP 骨架：主进程负责窗口、本地目录选择、录音文件与 Markdown 文件保存；渲染层负责 UI 状态和录音交互。服务端代理契约位于 `server/proxy-contract.md`，实际 STT 接入尚未完成。
+- Electron + 原生 HTML/CSS/JS。electron/main.js 负责窗口、IPC、目录选择、本地 WebM/Markdown 保存与删除、代理请求和全局快捷键入口；preload.js 暴露受限接口。
+- electron/display-media.js 从 desktopCapturer 获取实际屏幕来源并请求 loopback 系统音频；renderer.js 立即停止视频轨道，仅录制音频。
+- src/renderer.js 管理 idle/starting/recording/processing 状态，防止重复启动；录音结束后才提交转录。
+- src/audio-format.js 在内存中把 WebM 解码为 16 kHz 单声道 PCM16 WAV；server/volcengine.js 以 Base64 JSON 提交极速版接口，校验 HTTP 与服务状态码。
+- server/index.js 提供 GET /health 和 POST /v1/transcriptions；代理使用 APP ID + Access Token，尚无新版 API Key 鉴权支持。契约见 server/proxy-contract.md。
+- config/env.js 只加载指定环境字段，已有进程环境优先。开发桌面端只从文件读取代理地址，代理读取服务配置；打包版不自动加载项目 .env。
+- electron/shortcuts.js 负责全局开始/结束快捷键的校验、注册、冲突回滚与本地保存；src/settings.js 提供设置界面。
 
-## 已确认的产品边界
+## 数据与边界
 
-- 目标平台：Windows 10 及以上。
-- 运行形态：免安装桌面应用；本期不实现自动更新。
-- 录音来源：只捕获电脑播放的系统声音，不捕获麦克风。
-- 转录时机：录音结束后统一转录，不做录制过程中的实时转录。
-- 转录服务：通过服务端代理调用火山引擎语音识别 STT；支持中文和英文，输出需要标点。
-- 数据落点：录音文件和 Markdown 文本最终只保存在本地用户指定目录，两者不能分开配置。
-- 云端数据：音频允许短暂经过代理，但代理不得保存音频、文字或任何可还原内容。
-- 导出与管理：Markdown 是否包含时间戳由用户选择；不做音频回放、重命名和搜索；删除时同时删除录音与 Markdown。
+目标平台 Windows 10+，只捕获系统声音，不提供麦克风入口和录制中转录。数据流为系统声音 → 内存 WebM → 内存 WAV → 代理 → 火山引擎 → 文本。成功后在用户目录保存原始 WebM 和 Markdown；失败后结束本次流程，没有自动重试或失败录音落盘。
 
-## 尚未决策的工程问题
+目录偏好保存在渲染器 localStorage，快捷键保存在 userData/shortcuts.json。最近结果仅在当前进程内存，不提供历史列表。Markdown 当前时间选项写入保存时的本地时刻，没有把上游分段时间戳写入正文。
 
-- 桌面框架、编程语言及 Windows 系统音频捕获 API。
-- 服务端代理的临时接收、转发、超时、内存清理和日志脱敏策略。
-- 火山引擎 STT 的请求协议、错误映射、网络超时和服务端鉴权配置。
-- 本地录音格式、Markdown 文件命名、目录结构及文件冲突处理。
-- 服务端代理部署方式、访问控制、监控和故障恢复；不得引入音频或文本持久化。
+代理代码不主动将音频/文字写入磁盘，内存由垃圾回收管理；尚未验证操作系统、崩溃转储和部署链路的数据保留行为，不能宣称立即安全擦除。
 
-技术栈必须在上述边界和 UI 设计确认后选择；当前阶段不写业务代码。
+## 待完善
+
+火山引擎真实权限联调、代理访问控制与部署、请求取消、长录音内存和大小限制、文件冲突/部分保存/部分删除恢复，以及 portable 代理配置与实际构建。具体风险见 technical-debt.md。

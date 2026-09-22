@@ -35,6 +35,9 @@ EchoNote 是规划中的 Windows 桌面端实时录音转录软件：用户主�
 
 ## 上下文索引
 
+- `README.md`：项目入口、当前状态与启动方式。
+- `docs/repository-audit.md`：目录用途、生成残留与清理建议。
+- `docs/local-development.md`：本地配置、运行与联调说明。
 - `.agents/architecture.md`：架构事实与待决技术边界。
 - `.agents/testing.md`：验证现状与质量门槛。
 - `.agents/technical-debt.md`：当前缺口与风险。

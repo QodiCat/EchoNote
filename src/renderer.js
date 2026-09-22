@@ -3,9 +3,9 @@ const $ = (id) => document.getElementById(id);
 
 function toast(message) { const el = $('toast'); el.textContent = message; el.classList.add('show'); window.clearTimeout(toast.timer); toast.timer = window.setTimeout(() => el.classList.remove('show'), 3200); }
 function setDirectory(directory) { state.directory = directory || ''; if (state.directory) { localStorage.setItem('echonote.directory', state.directory); $('folderPath').textContent = state.directory; $('setupBanner').classList.add('hidden'); } else { $('folderPath').textContent = '尚未设置保存目录'; $('setupBanner').classList.remove('hidden'); } }
-function setStatus(label, live = false) { $('statusPill').innerHTML = `<span class="status-dot"></span> ${label}`; $('statusPill').classList.toggle('live', live); }
+function setStatus(label, live = false) { const labels = { READY: '就绪', RECORDING: '录音中', PROCESSING: '转录中', SAVED: '已保存', ERROR: '失败' }; $('statusPill').innerHTML = `<span class="status-dot"></span> ${labels[label] || label}`; $('statusPill').classList.toggle('live', live); }
 function setTimer(seconds) { const min = String(Math.floor(seconds / 60)).padStart(2, '0'); const sec = String(seconds % 60).padStart(2, '0'); $('recordingTimer').textContent = `${min}:${sec}`; }
-function setIdle() { document.querySelector('.record-card')?.classList.remove('recording'); $('recordTitle').textContent = '准备好开始了吗？'; $('recordHint').textContent = '点击下方按钮，EchoNote 只会捕获电脑播放的系统声音。'; $('recordButton').classList.remove('recording'); $('recordButtonIcon').textContent = '●'; $('recordButtonText').textContent = '开始录音'; $('stopButton').disabled = true; setStatus('READY'); setTimer(0); }
+function setIdle() { document.querySelector('.record-card')?.classList.remove('recording'); $('recordTitle').textContent = '待录音'; $('recordHint').textContent = '停止后自动转录'; $('recordButton').classList.remove('recording'); $('recordButtonIcon').textContent = '●'; $('recordButtonText').textContent = '开始录音'; $('stopButton').disabled = true; setStatus('READY'); setTimer(0); }
 async function chooseDirectory() { const directory = await window.echoNote.selectOutputDirectory(); if (directory) { setDirectory(directory); toast('保存目录已更新'); } }
 async function startRecording() {
   if (state.phase !== 'idle') return;

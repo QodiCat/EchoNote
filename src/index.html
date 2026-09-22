@@ -5,27 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EchoNote</title>
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./settings.css" />
   </head>
   <body>
     <main class="app-shell">
-      <aside class="sidebar">
-        <div class="brand"><span class="brand-mark">E</span><span>EchoNote</span></div>
-        <div class="sidebar-copy"><span class="eyebrow">FOCUS MODE</span><h1>把声音，<br /><em>留成文字。</em></h1><p>录下电脑正在播放的内容，安静地整理成一份属于你的笔记。</p></div>
-        <div class="sidebar-footer"><span class="signal-dot"></span><span>本地优先 · 安全保存</span></div>
-      </aside>
       <section class="workspace">
-        <header class="topbar"><div><span class="eyebrow">TODAY</span><h2>开始一段新的记录</h2></div><button id="settingsButton" class="icon-button" aria-label="打开设置">⚙</button></header>
-        <div id="setupBanner" class="setup-banner hidden"><span class="banner-icon">⌂</span><div><strong>先设置保存位置</strong><span>录音和 Markdown 会保存在同一个文件夹。</span></div><button id="setupButton" class="text-button">选择目录</button></div>
+        <header class="topbar"><h1>EchoNote</h1><button id="settingsButton" class="icon-button" aria-label="打开设置">设置</button></header>
+        <div id="setupBanner" class="setup-banner hidden"><span>录音前请选择保存目录</span><button id="setupButton" class="text-button">选择目录</button></div>
         <section id="record-card" class="record-card">
-          <div class="record-card-top"><span id="statusPill" class="status-pill"><span class="status-dot"></span> READY</span><span id="recordingTimer" class="timer">00:00</span></div>
-          <div class="record-center"><div id="orb" class="orb"><div class="orb-core">◉</div></div><h3 id="recordTitle">准备好开始了吗？</h3><p id="recordHint">点击下方按钮，EchoNote 只会捕获电脑播放的系统声音。</p></div>
+          <div class="record-card-top"><span id="statusPill" class="status-pill" role="status"><span class="status-dot"></span> 就绪</span><span class="source-label">系统声音 · 不录麦克风</span></div>
+          <div class="record-center"><span id="recordingTimer" class="timer" aria-label="录音时长">00:00</span><h2 id="recordTitle">待录音</h2><p id="recordHint">停止后自动转录</p></div>
           <div class="record-actions"><button id="recordButton" class="record-button"><span id="recordButtonIcon">●</span><span id="recordButtonText">开始录音</span></button><button id="stopButton" class="stop-button" disabled>停止录音</button></div>
         </section>
         <section class="bottom-grid">
-          <div class="panel"><div class="panel-heading"><div><span class="eyebrow">OUTPUT</span><h3>输出偏好</h3></div><span class="panel-icon">✦</span></div><label class="switch-row"><span><strong>Markdown 时间戳</strong><small>在文本中保留记录时间</small></span><input id="timestampToggle" type="checkbox" /><span class="switch"></span></label><div class="folder-row"><span class="folder-icon">⌂</span><div class="folder-copy"><small>保存到</small><strong id="folderPath">尚未设置保存目录</strong></div><button id="folderButton" class="small-button">更改</button></div></div>
-          <div class="panel"><div class="panel-heading"><div><span class="eyebrow">ACTIVITY</span><h3>最近一次记录</h3></div><span id="activityStatus" class="activity-label">暂无记录</span></div><div id="activityEmpty" class="activity-empty"><span class="empty-icon">☼</span><p>完成第一次录音后，<br />结果会出现在这里。</p></div><div id="activityResult" class="activity-result hidden"><div class="result-icon">✓</div><div><strong id="resultTitle">转录完成</strong><small id="resultDetail"></small></div><button id="deleteButton" class="delete-button">删除</button></div></div>
+          <div class="panel"><div class="panel-heading"><h3>保存设置</h3></div><label class="switch-row"><span>Markdown 包含记录时间</span><input id="timestampToggle" type="checkbox" /></label><div class="folder-row"><div class="folder-copy"><small>保存目录</small><strong id="folderPath">尚未设置</strong></div><button id="folderButton" class="small-button">更改</button></div></div>
+          <div class="panel"><div class="panel-heading"><h3>最近一次结果</h3><span id="activityStatus" class="activity-label"></span></div><div id="activityEmpty" class="activity-empty">暂无转录结果</div><div id="activityResult" class="activity-result hidden"><div><strong id="resultTitle">转录完成</strong><small id="resultDetail"></small></div><button id="deleteButton" class="delete-button">删除</button></div></div>
         </section>
-        <footer class="privacy-note"><span>◈</span> 音频只会短暂经过转录代理，录音与文字最终保存在本地。</footer>
       </section>
     </main>
     <div id="toast" class="toast" role="status"></div>
@@ -33,17 +28,16 @@
       <form id="shortcutForm">
         <div class="settings-heading"><h2 id="settingsTitle">设置</h2><button id="closeSettings" type="button" class="icon-button" aria-label="关闭设置">×</button></div>
         <h3>录音快捷键</h3>
-        <p class="settings-help">保存后全局生效，应用在后台时也可使用。触发后会显示录音窗口。</p>
+        <p class="settings-help">后台可用，触发时显示录音窗口。</p>
         <label for="startShortcut">开始录音</label>
         <input id="startShortcut" type="text" placeholder="例如 Ctrl+Alt+R" maxlength="80" autocomplete="off" spellcheck="false" aria-describedby="shortcutHelp" />
         <label for="stopShortcut">结束录音</label>
         <input id="stopShortcut" type="text" placeholder="例如 Ctrl+Alt+S" maxlength="80" autocomplete="off" spellcheck="false" aria-describedby="shortcutHelp" />
-        <p id="shortcutHelp" class="settings-help">输入组合键名称：Ctrl / Alt / Shift + 字母、数字或 F1–F24，必须包含 Ctrl 或 Alt。留空并保存即可关闭对应快捷键。</p>
+        <p id="shortcutHelp" class="settings-help">Ctrl 或 Alt + 字母、数字、F1–F24，可加 Shift。留空保存即关闭。</p>
         <p id="shortcutError" class="settings-error" role="alert"></p>
         <div class="settings-actions"><button id="settingsFolder" type="button" class="small-button">更改保存目录</button><button id="saveShortcuts" type="submit" class="record-button">保存快捷键</button></div>
       </form>
     </dialog>
-    <link rel="stylesheet" href="./settings.css" />
     <script src="./audio-format.js"></script>
     <script src="./renderer.js"></script>
     <script src="./settings.js"></script>
