@@ -1,5 +1,12 @@
 const http = require('node:http');
 const crypto = require('node:crypto');
+const path = require('node:path');
+const { loadEnv } = require('../config/env');
+loadEnv(path.join(__dirname, '..', '.env'), [
+  'PORT', 'MAX_AUDIO_BYTES', 'VOLCENGINE_ASR_ENDPOINT',
+  'VOLCENGINE_ASR_RESOURCE_ID', 'VOLCENGINE_ASR_APP_KEY',
+  'VOLCENGINE_ASR_ACCESS_KEY', 'VOLCENGINE_ASR_TIMEOUT_MS'
+]);
 const { transcribe } = require('./volcengine');
 
 const port = Number(process.env.PORT || 8787);
@@ -38,7 +45,7 @@ const server = http.createServer(async (req, res) => {
     if (!audio.length) return json(res, 400, { error: { code: 'empty_audio', message: '音频不能为空' } });
     const language = req.headers['x-echonote-language'] || 'zh-en';
     const includeTimestamps = req.headers['x-echonote-timestamps'] === 'true';
-    const result = await transcribe({ audio, contentType: req.headers['content-type'] || 'audio/ogg', language, includeTimestamps, requestId });
+    const result = await transcribe({ audio, contentType: req.headers['content-type'], language, includeTimestamps, requestId });
     return json(res, 200, { requestId, text: result.text, timestamps: includeTimestamps ? (result.timestamps || []) : [] });
   } catch (error) {
     const status = error.status || 502;

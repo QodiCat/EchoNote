@@ -1,6 +1,12 @@
-const { app, BrowserWindow, dialog, ipcMain, session } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, session, desktopCapturer } = require('electron');
+const { createDisplayMediaHandler } = require('./display-media');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { loadEnv } = require('../config/env');
+
+if (!app.isPackaged) {
+  loadEnv(path.join(__dirname, '..', '.env'), ['ECHONOTE_PROXY_URL']);
+}
 
 let mainWindow;
 
@@ -20,9 +26,7 @@ function createWindow() {
     }
   });
 
-  session.defaultSession.setDisplayMediaRequestHandler((request, callback) => {
-    callback({ video: request.video, audio: 'loopback' });
-  });
+  session.defaultSession.setDisplayMediaRequestHandler(createDisplayMediaHandler(desktopCapturer));
 
   mainWindow.loadFile(path.join(__dirname, '..', 'src', 'index.html'));
 }
@@ -59,7 +63,7 @@ app.whenReady().then(() => {
     const response = await fetch(`${proxyUrl.replace(/\/$/, '')}/v1/transcriptions`, {
       method: 'POST',
       headers: {
-        'content-type': 'audio/ogg',
+        'content-type': 'audio/wav',
         'x-echonote-language': 'zh-en',
         'x-echonote-timestamps': String(Boolean(includeTimestamps))
       },
