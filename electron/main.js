@@ -1,4 +1,5 @@
-const { app, BrowserWindow, dialog, ipcMain, session, desktopCapturer, globalShortcut } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, session, desktopCapturer, globalShortcut, Tray, Menu, nativeImage } = require('electron');
+const { createBackground } = require('./background');
 const { createShortcuts } = require('./shortcuts');
 const { createDisplayMediaHandler } = require('./display-media');
 const fs = require('node:fs/promises');
@@ -11,6 +12,7 @@ if (!app.isPackaged) {
 
 let mainWindow;
 let shortcuts;
+let background;
 
 async function runRecordingShortcut(action) {
   if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;
@@ -40,6 +42,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
+      backgroundThrottling: false,
       sandbox: false
     }
   });
@@ -100,8 +103,8 @@ app.whenReady().then(async () => {
     return payload;
   });
   createWindow();
-  app.on('activate', () => { if (BrowserWindow.getAllWindows().length === 0) createWindow(); });
+  background = createBackground({ app, window: mainWindow, Tray, Menu, nativeImage });
 });
 
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
-app.on('will-quit', () => shortcuts?.dispose());
+app.on('will-quit', () => { background?.dispose(); shortcuts?.dispose(); });
