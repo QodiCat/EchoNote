@@ -21,6 +21,7 @@
     "productName": "EchoNote",
     "files": ["electron/**/*", "src/**/*", "config/**/*", "package.json"],
     "win": {
+      "icon": "src/assets/echonote.ico",
       "target": "portable"
     }
   }

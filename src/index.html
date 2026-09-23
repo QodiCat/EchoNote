@@ -4,13 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EchoNote</title>
+    <link rel="icon" type="image/png" href="./assets/echonote.png" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./settings.css" />
   </head>
   <body>
     <main class="app-shell">
       <section class="workspace">
-        <header class="topbar"><h1>EchoNote</h1><button id="settingsButton" class="icon-button" aria-label="打开设置">设置</button></header>
+        <header class="topbar"><h1><img class="brand-icon" src="./assets/echonote.png" alt="" width="36" height="36" />EchoNote</h1><button id="settingsButton" class="icon-button" aria-label="打开设置">设置</button></header>
         <div id="setupBanner" class="setup-banner hidden"><span>录音前请选择保存目录</span><button id="setupButton" class="text-button">选择目录</button></div>
         <section id="record-card" class="record-card">
           <div class="record-card-top"><span id="statusPill" class="status-pill" role="status"><span class="status-dot"></span> 就绪</span><span class="source-label">系统声音 · 不录麦克风</span></div>

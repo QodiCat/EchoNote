@@ -1,16 +1,11 @@
+const path = require('node:path');
+
 // Keep the recording renderer alive when the user closes the main window.
 function createBackground({ app, window, Tray, Menu, nativeImage }) {
   let quitting = false;
-  const size = 32;
-  const pixels = Buffer.alloc(size * size * 4);
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const bar = x >= 7 && x <= 24 && x % 5 < 3 && Math.abs(y - 16) <= [5, 10, 7, 12][Math.floor((x - 7) / 5)];
-      const offset = (y * size + x) * 4;
-      pixels.set(bar ? [255, 255, 255, 255] : [190, 100, 45, 255], offset);
-    }
-  }
-  const tray = new Tray(nativeImage.createFromBitmap(pixels, { width: size, height: size }));
+  const icon = nativeImage.createFromPath(path.join(__dirname, '..', 'src', 'assets', 'echonote-tray.png'));
+  if (icon.isEmpty()) throw new Error('无法加载 EchoNote 托盘图标');
+  const tray = new Tray(icon);
   const show = () => {
     if (window.isDestroyed()) return;
     if (window.isMinimized()) window.restore();

@@ -22,6 +22,8 @@ Windows 系统声音录音与转录桌面应用，使用 Electron + 原生 HTML/
 
 ## 文档入口
 
+- [应用图标与资源生成](docs/app-icon.md)
+
 - [目录审查与清理建议](docs/repository-audit.md)
 - [工程架构](.agents/architecture.md)、[测试现状](.agents/testing.md)、[技术债](.agents/technical-debt.md)、[界面现状](.agents/ui-design.md)
 - [产品入口](.product/README.md)、[交付状态](.product/phase-1/echonote-v1-delivery-status.md)

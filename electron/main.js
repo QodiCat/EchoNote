@@ -38,6 +38,7 @@ function createWindow() {
     minHeight: 640,
     backgroundColor: '#f7f8fa',
     title: 'EchoNote',
+    icon: path.join(__dirname, '..', 'src', 'assets', 'echonote.ico'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

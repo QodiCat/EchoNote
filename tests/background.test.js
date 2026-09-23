@@ -23,7 +23,7 @@ function setup() {
     destroy() { calls.push('destroyTray'); }
   }
   const background = createBackground({ app, window, Tray,
-    Menu: { buildFromTemplate: items => items }, nativeImage: { createFromBitmap: () => ({}) } });
+    Menu: { buildFromTemplate: items => items }, nativeImage: { createFromPath: () => ({ isEmpty: () => false }) } });
   return { app, window, tray, calls, close, background, prevented: () => prevented,
     minimize: () => { minimized = true; }, destroy: () => { destroyed = true; } };
 }
