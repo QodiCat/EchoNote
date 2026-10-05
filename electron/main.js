@@ -1,4 +1,5 @@
-const { app, BrowserWindow, dialog, ipcMain, session, desktopCapturer, globalShortcut, Tray, Menu, nativeImage, safeStorage } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, session, desktopCapturer, globalShortcut, Tray, Menu, nativeImage, safeStorage, shell } = require('electron');
+const { openResultFolder } = require('./result-folder');
 const { createBackground } = require('./background');
 const { createShortcuts } = require('./shortcuts');
 const { createDisplayMediaHandler } = require('./display-media');
@@ -27,6 +28,7 @@ app.on('second-instance', () => {
 let mainWindow;
 let shortcuts;
 let background;
+let lastSavedFiles = null;
 
 async function runRecordingShortcut(action) {
   if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;
@@ -103,13 +105,19 @@ app.whenReady().then(async () => {
     await fs.writeFile(recordingPath, Buffer.from(buffer));
     const markdown = includeTimestamps ? `[${new Date().toLocaleTimeString()}] ${transcript}\n` : `${transcript}\n`;
     await fs.writeFile(markdownPath, markdown, 'utf8');
-    return { recordingPath, markdownPath };
+    lastSavedFiles = { recordingPath, markdownPath };
+    return lastSavedFiles;
   });
 
   ipcMain.handle('delete-recording', async (_event, { recordingPath, markdownPath }) => {
     await Promise.all([fs.rm(recordingPath, { force: false }), fs.rm(markdownPath, { force: false })]);
+    if (lastSavedFiles?.markdownPath === markdownPath) lastSavedFiles = null;
     return true;
   });
+
+  ipcMain.handle('open-result-folder', () => openResultFolder(lastSavedFiles?.markdownPath, {
+    openPath: directory => shell.openPath(directory)
+  }));
 
   ipcMain.handle('transcribe-recording', async (_event, payload) => {
     if (!localProxy) throw new Error(proxyError || '本地转录服务未启动');

@@ -58,4 +58,15 @@ async function finishRecording() {
 }
 async function deleteLast() { if (!state.lastFiles) return; if (!window.confirm('将同时删除录音和 Markdown 文件，确定删除吗？')) return; try { await window.echoNote.deleteRecording(state.lastFiles); state.lastFiles = null; $('activityResult').classList.add('hidden'); $('activityEmpty').classList.remove('hidden'); $('activityStatus').textContent = '暂无记录'; toast('记录已删除'); } catch (error) { toast('删除失败，请检查文件是否被其他程序占用'); } }
 
+async function openLastFolder() {
+  if (!state.lastFiles || $('openResultFolder').disabled) return;
+  $('openResultFolder').disabled = true;
+  try {
+    const result = await window.echoNote.openResultFolder();
+    if (result.error) toast(result.error);
+  } catch { toast('无法打开转录文件夹，请重试'); }
+  finally { $('openResultFolder').disabled = false; }
+}
+$('openResultFolder').addEventListener('click', openLastFolder);
+
 setDirectory(state.directory); $('recordButton').addEventListener('click', startRecording); $('stopButton').addEventListener('click', stopRecording); $('setupButton').addEventListener('click', chooseDirectory); $('folderButton').addEventListener('click', chooseDirectory); $('deleteButton').addEventListener('click', deleteLast);

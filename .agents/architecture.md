@@ -27,3 +27,5 @@
 ## 2026-10-05 本地代理与凭据更新
 
 本段更新此前的独立代理和打包配置描述：桌面主进程内的 electron/local-proxy.js 自动管理 server/proxy.js，回环监听、动态端口和随机令牌；退出关闭服务和连接。server/index.js 保留独立调试入口。electron/service-settings.js 使用 safeStorage 加密凭据到 userData/transcription.env，状态接口不返回密钥；src/service-settings.js 提供用户输入。开发版读取 .env 的非敏感配置，打包版读取随包 .env.example。桌面不导入项目 .env 中的旧凭据。录音及文本数据流和落盘策略不变。
+
+2026-10-05：新增 electron/result-folder.js。主进程记录最近成功保存的文件路径，open-result-folder IPC 不接收任意路径参数；校验目录后调用 shell.openPath。最近结果删除后清除记录，渲染器隐藏入口。

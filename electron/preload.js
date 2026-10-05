@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('echoNote', {
   selectOutputDirectory: () => ipcRenderer.invoke('select-output-directory'),
   saveRecording: (payload) => ipcRenderer.invoke('save-recording', payload),
   deleteRecording: (payload) => ipcRenderer.invoke('delete-recording', payload),
+  openResultFolder: () => ipcRenderer.invoke('open-result-folder'),
   saveServiceSettings: (settings) => ipcRenderer.invoke('save-service-settings', settings),
   getProxyStatus: () => ipcRenderer.invoke('get-proxy-status'),
   transcribeRecording: (payload) => ipcRenderer.invoke('transcribe-recording', payload),

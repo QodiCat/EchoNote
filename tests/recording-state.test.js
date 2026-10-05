@@ -85,3 +85,20 @@ test('unconfigured transcription prevents recording before audio capture', async
   await x.start();
   assert.equal(x.counts().captures, 0);
 });
+
+test('opening a result folder guards missing results and restores the button after errors', async () => {
+  const x = setup();
+  let calls = 0;
+  x.context.window.echoNote.openResultFolder = async () => { calls++; return { error: '文件夹已移动' }; };
+  await x.context.openLastFolder();
+  assert.equal(calls, 0);
+  vm.runInContext("state.lastFiles = { markdownPath: 'saved/record.md' }; state.directory = 'new-directory'", x.context);
+  await x.context.openLastFolder();
+  assert.equal(calls, 1);
+  assert.equal(x.node('toast').textContent, '文件夹已移动');
+  assert.equal(x.node('openResultFolder').disabled, false);
+  x.context.window.echoNote.openResultFolder = async () => { throw new Error('IPC failed'); };
+  await x.context.openLastFolder();
+  assert.match(x.node('toast').textContent, /无法打开/);
+  assert.equal(x.node('openResultFolder').disabled, false);
+});
