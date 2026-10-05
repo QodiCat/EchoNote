@@ -31,3 +31,9 @@ UI 已精简；上轮 Browser 连接没有可用浏览器，未完成视觉检�
 - Windows x64 portable 构建及独立运行；不包含自动更新。
 
 验收目标见 .product/phase-1/echonote-v1-prd.md；未通过的项目不得记为完成。
+
+## 2026-10-05 增量验证
+
+30 项自动测试和扩展语法检查通过。新增代理真实本机 HTTP 启停、动态凭据、鉴权、413、错误脱敏测试；凭据存储接口替身的持久化/恢复/损坏/保存失败测试；未配置禁止录音。npm run build 的原输出目录因 EPERM 无法替换，改用 --config.directories.output=dist/managed-proxy 构建通过。包内含代理和 .env.example，不含 .env。真实 safeStorage 与界面由 tests/electron-smoke.cjs 单独验证，结果另记。真实音频和火山引擎账号仍待验收。
+
+最终实测：Electron 隐藏窗口读取构建后的 app.asar，真实 Windows safeStorage 加密、凭据重载、设置表单 IPC、输入清空、代理启动/关闭均通过。仅使用合成凭据，不发送音频。截图 dist/smoke/settings.png 已检查，结果 dist/smoke/result.json。受限环境 GPU 子进程失败后，在普通 Windows 环境验证通过。真实系统录音和云端转录仍待验收。

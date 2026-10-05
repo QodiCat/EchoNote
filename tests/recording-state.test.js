@@ -40,6 +40,7 @@ function setup() {
     }
   });
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../src/renderer.js'), 'utf8'), context);
+  vm.runInContext('serviceReady = true', context);
   return { context, node, start: () => context.startRecording(), stop: () => context.stopRecording(),
     accept: () => resolveCapture(stream), reject: () => rejectCapture(new Error('capture failed')),
     finish: () => context.finishRecording(), complete: () => resolveTranscript({ text: 'test' }),
@@ -76,4 +77,11 @@ test('capture failure returns to idle and allows a fresh attempt', async () => {
   assert.equal(x.counts().captures, 2);
   x.stop();
   assert.equal(x.counts().stops, 1);
+});
+
+test('unconfigured transcription prevents recording before audio capture', async () => {
+  const x = setup();
+  vm.runInContext('serviceReady = false', x.context);
+  await x.start();
+  assert.equal(x.counts().captures, 0);
 });

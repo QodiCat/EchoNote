@@ -1,42 +1,37 @@
 # 本地启动
 
-先运行 `npm install`。没有 `.env` 时从 `.env.example` 复制；已有 `.env` 不要覆盖。
+运行 `npm install` 安装依赖，然后运行 `npm run dev`。桌面主进程自动启动本地 HTTP 转录代理，不再需要第二个终端。
 
-在项目根目录的 `.env` 填写配置，然后分别在两个终端运行：
+## 用户配置
 
-```powershell
-npm run proxy:start
-```
+打开“设置” → “火山引擎转录”，填写同一应用的 APP ID 和 Access Token（不是 Secret Key），保存后立即生效。需要开通录音文件识别极速版服务。当前沿用 APP ID + Access Token 鉴权，不支持新版单一 API Key。
 
-```powershell
-npm run dev
-```
+凭据由 Electron safeStorage 加密后存入 userData/transcription.env，受当前 Windows 用户保护。界面不回显已保存凭据；更换时重新填写两项。加密不可用、文件损坏或保存失败会显示错误，不写明文或默认成功。录音/转录期间界面禁止修改凭据。
 
-开发版桌面应用自行从项目根目录 `.env` 加载 `ECHONOTE_PROXY_URL`；代理加载端口、请求大小和火山引擎相关配置。已有环境变量优先；缺少配置时仍由业务流程明确报错。读取文件遇到权限等异常时不静默忽略。
+未配置凭据时阻止开始录音。保存仅验证输入及本地存储，不代表上游鉴权已通过；服务权限在真实转录时验证。之前的 HTTP 403 / 45000030 尚无解决证据。
 
-加载器只读取各进程允许的配置项，不从文件加载 Node/Electron 运行开关。桌面应用不从文件加载火山引擎密钥；`.env` 不属于打包文件。打包版的代理地址配置仍需另行完善。
+## 配置与独立代理
 
-无需通过 `node --env-file` 启动 Electron。`npm test` 覆盖配置白名单、环境变量优先级、文件缺失和读取异常；图形窗口与真实转录需要手工验证。
+默认非敏感配置集中在 .env.example，并随应用打包。开发桌面端从项目 .env 加载非敏感配置；打包版使用 .env.example。桌面端不自动导入项目 .env 的旧凭据，需在设置界面保存一次。
 
-## 凭据与联调
+内置代理仅监听 127.0.0.1，由系统分配空闲端口，使用每次启动生成的随机令牌验证请求。端口 0 是动态分配策略，不使用固定业务端口；ECHONOTE_PROXY_URL 仅作本地 URL 模板，实际主机和端口由管理器替换，不支持远程代理模式。
 
-- 当前代理使用旧版语音控制台鉴权：`VOLCENGINE_ASR_APP_KEY` 对应 APP ID，`VOLCENGINE_ASR_ACCESS_KEY` 对应同一应用的 Access Token，不是 Secret Key。
-- 默认资源为 `volc.bigasr.auc_turbo`，必须与应用开通的极速版服务匹配。代码尚未提供新版 `X-Api-Key` 鉴权。
-- 最近用户反馈 HTTP 403 / 45000030；凭据/资源权限未确认解决，不能据此宣称已经转录成功。
-- 修改代理环境配置后，停止旧代理并重新运行 `npm run proxy:start`；不要将密钥、原始请求体或转录内容放入排错日志。
+开发者仍可单独运行 `npm run proxy:start`，用于接口调试。该模式从 .env 读取凭据、PORT 等，再从 .env.example 补充默认项；进程环境优先。独立代理不被桌面程序使用，不具备内置代理的随机令牌，不应对外部署。
 
-## 快捷键与验证
+## 打包
 
-右上角“设置”中输入开始和结束快捷键，例如 `Ctrl+Alt+R` 和 `Ctrl+Alt+S`；保存后全局生效，留空保存关闭。配置保存在 Electron userData 下的 shortcuts.json。打开设置时开始快捷键不会触发录音。
+`npm run build` 生成 Windows x64 portable exe，包含 Electron、代理代码和非敏感配置，不包含项目 .env、用户凭据或录音。使用者无需安装 Node.js。原构建目录被占用时，可运行 `npm run build -- --config.directories.output=dist/managed-proxy` 使用独立输出目录。
 
-`npm test` 包含后台窗口生命周期回归测试；`npm run lint` 为语法检查，不是完整风格或静态分析。`npm run build` 配置 Windows x64 portable。不要将 `dist*` 临时文件作为完整发布产物。
+## 快捷键与后台运行
 
-## 后台运行
+在设置中保存开始和结束快捷键，例如 Ctrl+Alt+R、Ctrl+Alt+S；留空保存关闭。快捷键保存在 userData/shortcuts.json。
 
-关闭主窗口会隐藏到系统托盘，保留正在运行的录音和转录任务；最小化或隐藏时禁用渲染器后台计时限速。点击托盘图标或菜单“显示主窗口”可返回；全局快捷键仍按原行为唤起窗口。右键托盘选择“退出 EchoNote（结束当前任务）”才会退出，未完成任务会随进程结束。
+关闭主窗口会隐藏到托盘，录音、转录和本地代理继续运行；右键托盘选择“退出 EchoNote（结束当前任务）”才会退出，同时关闭本地代理。未完成任务随进程退出结束。没有新增开机启动、Windows 服务或自动更新。
 
-后台驻留不等于脱离开发终端或自动托管代理。开发时仍需运行应用和代理；portable 应用也需要可访问的转录代理。本次不增加开机启动或 Windows 服务。
+## 验证
 
-2026-09-23：`npm test` 的 22 项测试及 `npm run lint` 通过。自动测试覆盖关闭隐藏、托盘恢复、显式退出和资源清理。真实 Windows 托盘显示、隐藏后持续录音及转录保存仍需桌面验证，不能由模拟测试替代。
+`npm test` 验证代理生命周期、访问控制、凭据存储及既有录音和转录逻辑。`npm run lint` 为语法检查。tests/electron-smoke.cjs 可由 Electron 运行，传入构建后的 app.asar 路径，使用合成凭据验证真实 safeStorage 和设置界面 IPC；输出位于 dist/smoke。
 
-同日 `npm run build` 成功生成 `dist/EchoNote 0.1.0.exe`，包含本次后台驻留修复。构建通过不代表真实录音或转录验收通过。
+真实系统声音、火山引擎服务权限、完整录音到保存流程仍需用户桌面验收，不能由测试或构建通过代替。
+
+2026-10-05 最终验证：30 项自动测试与语法检查通过；独立目录 Windows x64 portable 构建通过，产物 dist/managed-proxy/EchoNote 0.1.0.exe。Electron 隐藏窗口读取包内 app.asar，验证设置表单 IPC、真实 Windows safeStorage 加密/重新读取、输入清空及代理启停通过；截图已检查，结果位于 dist/smoke/result.json。受限环境图形子进程失败后，在普通 Windows 执行环境通过。仅用合成凭据，没有发送音频到云端。真实录音到转录保存仍待用户验收。

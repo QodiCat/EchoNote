@@ -5,12 +5,15 @@ Windows 系统声音录音与转录桌面应用，使用 Electron + 原生 HTML/
 ## 开发启动
 
 1. 执行 `npm install` 安装依赖。
-2. 若没有 `.env`，复制 `.env.example` 为 `.env`，在本地填写服务配置，不要覆盖已有凭据。
-3. 在两个终端分别运行 `npm run proxy:start` 和 `npm run dev`。
+2. 执行 `npm run dev`，桌面应用会自动管理本地转录代理，无需另开代理终端。
+3. 打开“设置”，填写火山引擎录音文件识别极速版的 APP ID 和 Access Token，点击“保存转录凭据”。凭据使用 Windows 加密能力保存，不回显。
+4. 选择保存目录，主动开始录音，停止后发送到火山引擎转录。
 
-开发时应用和代理自动读取项目 `.env`；旧版鉴权字段 `VOLCENGINE_ASR_APP_KEY` 填 APP ID，`VOLCENGINE_ASR_ACCESS_KEY` 填 Access Token。详细说明见 [本地启动](docs/local-development.md)。
+打包版双击 exe 即可启动，无需安装 Node.js 或手动配置项目 .env。详见 [本地启动](docs/local-development.md)。
 
 ## 当前进度
+
+- 2026-10-05：桌面自动管理本地代理，设置中加密保存 APP ID / Access Token。30 项测试、语法检查和包内界面/Windows 加密验证通过；新包为 `dist/managed-proxy/EchoNote 0.1.0.exe`。
 
 - 支持关闭主窗口后驻留系统托盘；点击托盘恢复，右键菜单退出。后台转录仍依赖代理服务，详见 [后台运行](docs/local-development.md#后台运行)。
 

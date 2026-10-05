@@ -1,6 +1,9 @@
-const upstreamUrl = process.env.VOLCENGINE_ASR_ENDPOINT || 'https://openspeech.bytedance.com/api/v3/auc/bigmodel/recognize/flash';
-const resourceId = process.env.VOLCENGINE_ASR_RESOURCE_ID || 'volc.bigasr.auc_turbo';
-const timeoutMs = Number(process.env.VOLCENGINE_ASR_TIMEOUT_MS || 120000);
+const { loadEnv } = require('../config/env');
+const path = require('node:path');
+const defaults = {};
+loadEnv(path.join(__dirname, '..', '.env.example'), [
+  'VOLCENGINE_ASR_ENDPOINT', 'VOLCENGINE_ASR_RESOURCE_ID', 'VOLCENGINE_ASR_TIMEOUT_MS'
+], defaults);
 
 function configError(message) { return Object.assign(new Error(message), { status: 503, code: 'proxy_not_configured', publicMessage: message }); }
 
@@ -30,9 +33,12 @@ function upstreamError(response) {
   });
 }
 
-async function transcribe({ audio, contentType, includeTimestamps, requestId }, fetchImpl = fetch) {
-  const appKey = process.env.VOLCENGINE_ASR_APP_KEY;
-  const accessKey = process.env.VOLCENGINE_ASR_ACCESS_KEY;
+async function transcribe({ audio, contentType, includeTimestamps, requestId }, fetchImpl = fetch, config = process.env) {
+  const appKey = config.VOLCENGINE_ASR_APP_KEY;
+  const accessKey = config.VOLCENGINE_ASR_ACCESS_KEY;
+  const upstreamUrl = config.VOLCENGINE_ASR_ENDPOINT || defaults.VOLCENGINE_ASR_ENDPOINT;
+  const resourceId = config.VOLCENGINE_ASR_RESOURCE_ID || defaults.VOLCENGINE_ASR_RESOURCE_ID;
+  const timeoutMs = Number(config.VOLCENGINE_ASR_TIMEOUT_MS || defaults.VOLCENGINE_ASR_TIMEOUT_MS);
   if (!appKey || !accessKey) throw configError('服务端代理尚未配置火山引擎凭据');
   if (contentType !== 'audio/wav' || audio.length < 44 ||
       audio.toString('ascii', 0, 4) !== 'RIFF' || audio.toString('ascii', 8, 12) !== 'WAVE') {

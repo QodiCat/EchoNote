@@ -1,4 +1,4 @@
-const { app, BrowserWindow, dialog, ipcMain, session, desktopCapturer, globalShortcut, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, session, desktopCapturer, globalShortcut, Tray, Menu, nativeImage, safeStorage } = require('electron');
 const { createBackground } = require('./background');
 const { createShortcuts } = require('./shortcuts');
 const { createDisplayMediaHandler } = require('./display-media');
@@ -6,9 +6,23 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { loadEnv } = require('../config/env');
 
-if (!app.isPackaged) {
-  loadEnv(path.join(__dirname, '..', '.env'), ['ECHONOTE_PROXY_URL']);
-}
+const { createServiceSettings } = require('./service-settings');
+const { startLocalProxy } = require('./local-proxy');
+const serviceConfig = {};
+const serviceKeys = ['MAX_AUDIO_BYTES', 'VOLCENGINE_ASR_ENDPOINT', 'VOLCENGINE_ASR_RESOURCE_ID',
+  'VOLCENGINE_ASR_TIMEOUT_MS', 'ECHONOTE_PROXY_URL', 'ECHONOTE_PROXY_HOST'];
+if (!app.isPackaged) loadEnv(path.join(__dirname, '..', '.env'), serviceKeys, serviceConfig);
+loadEnv(path.join(__dirname, '..', '.env.example'), serviceKeys, serviceConfig);
+let localProxy;
+let serviceSettings;
+let proxyError = '';
+let closing = false;
+let proxyClosed = false;
+const hasLock = app.requestSingleInstanceLock();
+if (!hasLock) app.quit();
+app.on('second-instance', () => {
+  if (mainWindow) { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.show(); mainWindow.focus(); }
+});
 
 let mainWindow;
 let shortcuts;
@@ -54,6 +68,18 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  if (!hasLock) return;
+  serviceSettings = createServiceSettings({ filePath: path.join(app.getPath('userData'), 'transcription.env'), safeStorage });
+  await serviceSettings.initialize();
+  try { localProxy = await startLocalProxy({ config: serviceConfig, getCredentials: () => serviceSettings.config() }); }
+  catch { proxyError = '本地转录服务启动失败，请检查配置后重启应用'; }
+  const proxyStatus = () => ({ ...serviceSettings.status(), running: Boolean(localProxy?.status().running),
+    error: proxyError || localProxy?.status().error || serviceSettings.status().error });
+  ipcMain.handle('get-proxy-status', proxyStatus);
+  ipcMain.handle('save-service-settings', async (_event, settings) => {
+    try { await serviceSettings.save(settings); return proxyStatus(); }
+    catch (error) { return { error: error.message }; }
+  });
   shortcuts = createShortcuts({ registry: globalShortcut, filePath: path.join(app.getPath('userData'), 'shortcuts.json'), dispatch: runRecordingShortcut });
   await shortcuts.initialize();
   ipcMain.handle('get-shortcuts', () => shortcuts.get());
@@ -85,26 +111,22 @@ app.whenReady().then(async () => {
     return true;
   });
 
-  ipcMain.handle('get-proxy-status', () => ({ configured: Boolean(process.env.ECHONOTE_PROXY_URL) }));
-  ipcMain.handle('transcribe-recording', async (_event, { buffer, includeTimestamps }) => {
-    const proxyUrl = process.env.ECHONOTE_PROXY_URL;
-    if (!proxyUrl) throw new Error('服务端代理尚未配置');
-    const response = await fetch(`${proxyUrl.replace(/\/$/, '')}/v1/transcriptions`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'audio/wav',
-        'x-echonote-language': 'zh-en',
-        'x-echonote-timestamps': String(Boolean(includeTimestamps))
-      },
-      body: Buffer.from(buffer),
-      signal: AbortSignal.timeout(120000)
-    });
-    const payload = await response.json();
-    if (!response.ok) throw new Error(payload?.error?.message || '转录失败');
-    return payload;
+  ipcMain.handle('transcribe-recording', async (_event, payload) => {
+    if (!localProxy) throw new Error(proxyError || '本地转录服务未启动');
+    if (!serviceSettings.status().configured) throw new Error('请先在设置中填写火山引擎 APP ID 和 Access Token');
+    return localProxy.transcribe(payload);
   });
   createWindow();
   background = createBackground({ app, window: mainWindow, Tray, Menu, nativeImage });
+}).catch(() => { dialog.showErrorBox('启动失败', 'EchoNote 初始化失败，请检查本地配置和目录权限'); app.quit(); });
+
+app.on('before-quit', event => {
+  if (!localProxy || proxyClosed) return;
+  event.preventDefault();
+  if (closing) return;
+  closing = true;
+  localProxy.close().catch(() => dialog.showErrorBox('退出提示', '本地转录服务关闭失败，应用将结束进程'))
+    .finally(() => { proxyClosed = true; app.quit(); });
 });
 
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });

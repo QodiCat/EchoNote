@@ -10,3 +10,5 @@
 .settings-error { min-height: 20px; color: #ad3535; font-size: 12px; }
 .settings-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 20px; }
 button:disabled { cursor: not-allowed; opacity: .65; }
+.settings-dialog { max-height: calc(100vh - 48px); overflow-y: auto; }
+.settings-dialog input { box-sizing: border-box; }

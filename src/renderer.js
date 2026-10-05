@@ -1,5 +1,6 @@
 const state = { phase: 'idle', directory: localStorage.getItem('echonote.directory') || '', recorder: null, chunks: [], startedAt: null, timerId: null, lastFiles: null };
 const $ = (id) => document.getElementById(id);
+let serviceReady = false;
 
 function toast(message) { const el = $('toast'); el.textContent = message; el.classList.add('show'); window.clearTimeout(toast.timer); toast.timer = window.setTimeout(() => el.classList.remove('show'), 3200); }
 function setDirectory(directory) { state.directory = directory || ''; if (state.directory) { localStorage.setItem('echonote.directory', state.directory); $('folderPath').textContent = state.directory; $('setupBanner').classList.add('hidden'); } else { $('folderPath').textContent = '尚未设置保存目录'; $('setupBanner').classList.remove('hidden'); } }
@@ -9,6 +10,7 @@ function setIdle() { document.querySelector('.record-card')?.classList.remove('r
 async function chooseDirectory() { const directory = await window.echoNote.selectOutputDirectory(); if (directory) { setDirectory(directory); toast('保存目录已更新'); } }
 async function startRecording() {
   if (state.phase !== 'idle') return;
+  if (!serviceReady) { toast('请先打开设置，配置火山引擎转录凭据'); return; }
   state.phase = 'starting';
   $('recordButton').disabled = true;
   let stream;

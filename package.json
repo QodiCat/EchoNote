@@ -9,7 +9,7 @@
     "dev": "electron .",
     "proxy:start": "node server/index.js",
     "test": "node --check electron/main.js && node --check electron/preload.js && node --check src/renderer.js && node --test tests/*.test.js",
-    "lint": "node --check electron/main.js && node --check electron/background.js && node --check electron/preload.js && node --check electron/shortcuts.js && node --check src/renderer.js && node --check src/settings.js",
+    "lint": "node --check electron/main.js && node --check electron/background.js && node --check electron/preload.js && node --check electron/shortcuts.js && node --check src/renderer.js && node --check src/settings.js && node --check src/service-settings.js && node --check electron/service-settings.js && node --check electron/local-proxy.js && node --check server/proxy.js && node --check server/index.js && node --check server/volcengine.js",
     "build": "electron-builder --win --x64"
   },
   "devDependencies": {
@@ -19,7 +19,7 @@
   "build": {
     "appId": "com.echonote.desktop",
     "productName": "EchoNote",
-    "files": ["electron/**/*", "src/**/*", "config/**/*", "package.json"],
+    "files": ["electron/**/*", "src/**/*", "config/**/*", "server/**/*", ".env.example", "package.json"],
     "win": {
       "icon": "src/assets/echonote.ico",
       "target": "portable"
