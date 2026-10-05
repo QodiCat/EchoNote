@@ -12,13 +12,15 @@ async function startRecording() {
   if (state.phase !== 'idle') return;
   if (!serviceReady) { toast('请先打开设置，配置火山引擎转录凭据'); return; }
   state.phase = 'starting';
-  $('recordButton').disabled = true;
+  setTaskControls(true);
   let stream;
   try {
     if (!state.directory) {
       toast('请先设置保存目录'); await chooseDirectory();
-      if (!state.directory) { state.phase = 'idle'; $('recordButton').disabled = false; return; }
+      if (!state.directory) { state.phase = 'idle'; setTaskControls(false); return; }
     }
+    state.taskDirectory = state.directory;
+    state.taskTimestamps = $('timestampToggle').checked;
     stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
     stream.getVideoTracks().forEach((track) => track.stop());
     const audioTracks = stream.getAudioTracks();
@@ -32,7 +34,7 @@ async function startRecording() {
     state.recorder.start(); state.phase = 'recording'; $('record-card').classList.add('recording'); $('recordButton').classList.add('recording'); $('recordButtonIcon').textContent = '■'; $('recordButtonText').textContent = '录音中'; $('stopButton').disabled = false; $('recordTitle').textContent = '正在记录系统声音'; $('recordHint').textContent = '结束后会自动进入转录流程。'; setStatus('RECORDING', true); state.timerId = window.setInterval(() => setTimer(Math.floor((Date.now() - state.startedAt) / 1000)), 500);
   } catch (error) {
     stream?.getTracks().forEach(track => track.stop());
-    state.recorder = null; state.phase = 'idle'; $('recordButton').disabled = false;
+    state.recorder = null; state.phase = 'idle'; setTaskControls(false);
     toast(error.message || '无法开始录音'); setIdle();
   }
 }
@@ -49,14 +51,56 @@ async function finishRecording() {
   try {
     const buffer = await blob.arrayBuffer();
     const wavBuffer = await recordingToWav(buffer);
-    const transcriptResult = await window.echoNote.transcribeRecording({ buffer: wavBuffer, includeTimestamps: $('timestampToggle').checked }); const transcript = transcriptResult.text; const baseName = `echonote-${new Date().toISOString().replace(/[:.]/g, '-')}`;
-    state.lastFiles = await window.echoNote.saveRecording({ directory: state.directory, buffer, baseName, transcript, includeTimestamps: $('timestampToggle').checked });
-    $('activityEmpty').classList.add('hidden'); $('activityResult').classList.remove('hidden'); $('activityStatus').textContent = '已保存'; $('resultDetail').textContent = state.lastFiles.markdownPath; setStatus('SAVED'); $('recordTitle').textContent = '已保存到本地'; $('recordHint').textContent = '你可以开始下一段记录。'; toast('录音和 Markdown 已保存');
-  } catch (error) { setStatus('ERROR'); $('recordTitle').textContent = '本次转录失败'; $('recordHint').textContent = '本次录音已结束，请重新点击开始录音。'; toast(error.message || '保存失败'); }
+    const result = await window.echoNote.processRecording({ directory: state.taskDirectory, buffer, wavBuffer,
+      startedAt: state.startedAt, includeTimestamps: state.taskTimestamps });
+    showTaskResult(result);
+  } catch (error) { showTaskResult({ error: error.message || '无法处理录音' }); }
   state.phase = 'idle'; state.chunks = [];
-  $('recordButton').disabled = false; $('recordButton').classList.remove('recording'); $('recordButtonIcon').textContent = '●'; $('recordButtonText').textContent = '开始录音'; document.querySelector('.record-card')?.classList.remove('recording'); setTimer(0);
+  setTaskControls(false); $('recordButton').classList.remove('recording'); $('recordButtonIcon').textContent = '●'; $('recordButtonText').textContent = '开始录音'; document.querySelector('.record-card')?.classList.remove('recording'); setTimer(0);
 }
-async function deleteLast() { if (!state.lastFiles) return; if (!window.confirm('将同时删除录音和 Markdown 文件，确定删除吗？')) return; try { await window.echoNote.deleteRecording(state.lastFiles); state.lastFiles = null; $('activityResult').classList.add('hidden'); $('activityEmpty').classList.remove('hidden'); $('activityStatus').textContent = '暂无记录'; toast('记录已删除'); } catch (error) { toast('删除失败，请检查文件是否被其他程序占用'); } }
+function setTaskControls(busy) {
+  for (const id of ['recordButton', 'importButton', 'folderButton', 'setupButton', 'settingsFolder', 'timestampToggle', 'deleteButton']) {
+    $(id).disabled = busy;
+  }
+}
+
+function showTaskResult(result) {
+  if (result.files) {
+    state.lastFiles = result.files;
+    $('activityEmpty').classList.add('hidden'); $('activityResult').classList.remove('hidden');
+    $('activityStatus').textContent = result.files.markdownPath ? '已保存' : '音频已保留';
+    $('resultTitle').textContent = result.files.markdownPath ? '转录完成' : '仅保存音频';
+    $('resultDetail').textContent = result.files.directory || result.files.recordingPath;
+    $('transcriptPreview').textContent = result.text || '';
+    $('transcriptPanel').classList.toggle('hidden', !result.files.markdownPath);
+  }
+  if (result.error) {
+    setStatus('ERROR'); $('recordTitle').textContent = '本次处理未完成';
+    $('recordHint').textContent = result.files ? '音频已保留，可打开文件夹查看或重新导入。' : '请选择文件或重新开始录音。';
+    toast(result.error);
+  } else {
+    setStatus('SAVED'); $('recordTitle').textContent = '音频与文本已保存';
+    $('recordHint').textContent = '已保存到本次任务的独立文件夹。'; toast('音频和 Markdown 已保存');
+  }
+}
+
+async function deleteLast() {
+  if (!state.lastFiles || state.phase !== 'idle') return;
+  const prompt = state.lastFiles.markdownPath
+    ? '将删除本次保存的音频和 Markdown 文件（不影响导入的原文件），确定删除吗？'
+    : '将删除本次保存的音频（不影响导入的原文件），确定删除吗？';
+  if (!window.confirm(prompt)) return;
+  state.phase = 'deleting';
+  setTaskControls(true);
+  try {
+    const result = await window.echoNote.deleteRecording(); state.lastFiles = null;
+    $('activityResult').classList.add('hidden'); $('activityEmpty').classList.remove('hidden');
+    $('transcriptPanel').classList.add('hidden'); $('transcriptPreview').textContent = '';
+    $('activityStatus').textContent = '暂无记录';
+    toast(result.folderRetained ? '结果已删除，文件夹中的其他文件已保留' : '本次结果和空文件夹已删除');
+  } catch { toast('删除失败，请检查文件是否被占用；部分文件可能已删除'); }
+  finally { state.phase = 'idle'; setTaskControls(false); }
+}
 
 async function openLastFolder() {
   if (!state.lastFiles || $('openResultFolder').disabled) return;

@@ -16,12 +16,13 @@
         <section id="record-card" class="record-card">
           <div class="record-card-top"><span id="statusPill" class="status-pill" role="status"><span class="status-dot"></span> 就绪</span><span class="source-label">系统声音 · 不录麦克风</span></div>
           <div class="record-center"><span id="recordingTimer" class="timer" aria-label="录音时长">00:00</span><h2 id="recordTitle">待录音</h2><p id="recordHint">停止后自动转录</p></div>
-          <div class="record-actions"><button id="recordButton" class="record-button"><span id="recordButtonIcon">●</span><span id="recordButtonText">开始录音</span></button><button id="stopButton" class="stop-button" disabled>停止录音</button></div>
+          <div class="record-actions"><button id="recordButton" class="record-button"><span id="recordButtonIcon">●</span><span id="recordButtonText">开始录音</span></button><button id="importButton" class="small-button" type="button">导入音频 / 视频</button><button id="stopButton" class="stop-button" disabled>停止录音</button></div>
         </section>
         <section class="bottom-grid">
           <div class="panel"><div class="panel-heading"><h3>保存设置</h3></div><label class="switch-row"><span>Markdown 包含记录时间</span><input id="timestampToggle" type="checkbox" /></label><div class="folder-row"><div class="folder-copy"><small>保存目录</small><strong id="folderPath">尚未设置</strong></div><button id="folderButton" class="small-button">更改</button></div></div>
           <div class="panel"><div class="panel-heading"><h3>最近一次结果</h3><span id="activityStatus" class="activity-label"></span></div><div id="activityEmpty" class="activity-empty">暂无转录结果</div><div id="activityResult" class="activity-result hidden"><div><strong id="resultTitle">转录完成</strong><small id="resultDetail"></small></div><button id="openResultFolder" class="small-button" type="button">打开文件夹</button><button id="deleteButton" class="delete-button">删除</button></div></div>
         </section>
+        <section id="transcriptPanel" class="panel transcript-panel hidden"><h3>转录文本</h3><pre id="transcriptPreview" class="transcript-preview"></pre></section>
       </section>
     </main>
     <div id="toast" class="toast" role="status"></div>
@@ -53,6 +54,7 @@
     </dialog>
     <script src="./audio-format.js"></script>
     <script src="./renderer.js"></script>
+    <script src="./import-media.js"></script>
     <script src="./settings.js"></script>
     <script src="./service-settings.js"></script>
   </body>

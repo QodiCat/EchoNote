@@ -9,8 +9,11 @@
     "dev": "electron .",
     "proxy:start": "node server/index.js",
     "test": "node --check electron/main.js && node --check electron/preload.js && node --check src/renderer.js && node --test tests/*.test.js",
-    "lint": "node --check electron/main.js && node --check electron/background.js && node --check electron/preload.js && node --check electron/shortcuts.js && node --check src/renderer.js && node --check src/settings.js && node --check src/service-settings.js && node --check electron/service-settings.js && node --check electron/result-folder.js && node --check electron/local-proxy.js && node --check server/proxy.js && node --check server/index.js && node --check server/volcengine.js",
-    "build": "electron-builder --win --x64"
+    "lint": "node --check electron/main.js && node --check electron/background.js && node --check electron/preload.js && node --check electron/shortcuts.js && node --check src/renderer.js && node --check src/settings.js && node --check src/service-settings.js && node --check electron/service-settings.js && node --check electron/result-folder.js && node --check electron/local-proxy.js && node --check server/proxy.js && node --check server/index.js && node --check server/volcengine.js && node --check electron/media-decoder.js && node --check electron/session-store.js && node --check electron/transcription-tasks.js && node --check src/import-media.js && node --check scripts/prepare-media.js && node --check scripts/verify-media.js",
+    "build": "electron-builder --win --x64",
+    "media:prepare": "node scripts/prepare-media.js",
+    "test:media": "node --test tests/media-decoder.integration.cjs",
+    "prebuild": "node scripts/verify-media.js"
   },
   "devDependencies": {
     "electron": "^38.1.0",
@@ -19,10 +22,29 @@
   "build": {
     "appId": "com.echonote.desktop",
     "productName": "EchoNote",
-    "files": ["electron/**/*", "src/**/*", "config/**/*", "server/**/*", ".env.example", "package.json"],
+    "files": [
+      "electron/**/*",
+      "src/**/*",
+      "config/**/*",
+      "server/**/*",
+      ".env.example",
+      "package.json"
+    ],
     "win": {
       "icon": "src/assets/echonote.ico",
       "target": "portable"
-    }
+    },
+    "extraResources": [
+      {
+        "from": "vendor/ffmpeg",
+        "to": "media",
+        "filter": [
+          "ffmpeg.exe",
+          "LICENSE",
+          "README.txt",
+          "manifest.json"
+        ]
+      }
+    ]
   }
 }

@@ -2,12 +2,17 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('echoNote', {
   selectOutputDirectory: () => ipcRenderer.invoke('select-output-directory'),
-  saveRecording: (payload) => ipcRenderer.invoke('save-recording', payload),
-  deleteRecording: (payload) => ipcRenderer.invoke('delete-recording', payload),
+  processRecording: (payload) => ipcRenderer.invoke('process-recording', payload),
+  importMedia: (payload) => ipcRenderer.invoke('import-media', payload),
+  onTaskProgress: (callback) => {
+    const listener = (_event, phase) => callback(phase);
+    ipcRenderer.on('task-progress', listener);
+    return () => ipcRenderer.removeListener('task-progress', listener);
+  },
+  deleteRecording: () => ipcRenderer.invoke('delete-recording'),
   openResultFolder: () => ipcRenderer.invoke('open-result-folder'),
   saveServiceSettings: (settings) => ipcRenderer.invoke('save-service-settings', settings),
   getProxyStatus: () => ipcRenderer.invoke('get-proxy-status'),
-  transcribeRecording: (payload) => ipcRenderer.invoke('transcribe-recording', payload),
   getShortcuts: () => ipcRenderer.invoke('get-shortcuts'),
   saveShortcuts: (settings) => ipcRenderer.invoke('save-shortcuts', settings)
 });

@@ -29,3 +29,11 @@
 本段更新此前的独立代理和打包配置描述：桌面主进程内的 electron/local-proxy.js 自动管理 server/proxy.js，回环监听、动态端口和随机令牌；退出关闭服务和连接。server/index.js 保留独立调试入口。electron/service-settings.js 使用 safeStorage 加密凭据到 userData/transcription.env，状态接口不返回密钥；src/service-settings.js 提供用户输入。开发版读取 .env 的非敏感配置，打包版读取随包 .env.example。桌面不导入项目 .env 中的旧凭据。录音及文本数据流和落盘策略不变。
 
 2026-10-05：新增 electron/result-folder.js。主进程记录最近成功保存的文件路径，open-result-folder IPC 不接收任意路径参数；校验目录后调用 shell.openPath。最近结果删除后清除记录，渲染器隐藏入口。
+
+2026-10-05 媒体导入进行中：electron/media-decoder.js 为独立模块，通过隐藏 FFmpeg 子进程仅提取第一条音轨为 16kHz 单声道 PCM，再构造有准确长度的 WAV。设输入/输出大小上限、超时和退出终止；当前未接入主进程或 UI。依赖安装下载超时，现有本机 FFmpeg 仅用于合成媒体测试；不表示新功能完成。
+
+## 2026-10-05 导入与分任务保存已接入
+
+用户确认保存音频与文本，录音及导入都创建本地时间戳独立目录；相同时间自动加序号。electron/session-store.js 管理生成文件，先音频后文本；录音 WebM、导入转换后 WAV；上游失败保留已保存音频。electron/transcription-tasks.js 串行编排本地选择、提取、保存、转录，主进程只保存受控结果引用；删除不接受渲染器任意路径，不触及导入源文件。src/import-media.js 处理阶段提示，renderer 显示文本和音频-only结果。
+
+媒体组件来自本机已验证的 Gyan FFmpeg 7.0.2 静态构建；media:prepare 准备到被忽略的 vendor/ffmpeg，prebuild 验证哈希及许可证，extraResources 打包到 resources/media。用户端不需另装 FFmpeg。在线 ffmpeg-static 下载失败的准备方案已替换。未实现长媒体自动分段，退出终止 FFmpeg；上游断连取消仍是既有缺口。

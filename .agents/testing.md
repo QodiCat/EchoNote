@@ -39,3 +39,9 @@ UI 已精简；上轮 Browser 连接没有可用浏览器，未完成视觉检�
 最终实测：Electron 隐藏窗口读取构建后的 app.asar，真实 Windows safeStorage 加密、凭据重载、设置表单 IPC、输入清空、代理启动/关闭均通过。仅使用合成凭据，不发送音频。截图 dist/smoke/settings.png 已检查，结果 dist/smoke/result.json。受限环境 GPU 子进程失败后，在普通 Windows 环境验证通过。真实系统录音和云端转录仍待验收。
 
 2026-10-05 打开文件夹增量：34 项自动测试和语法检查通过。新增中文/空格目录、无结果、目录移动、shell 返回错误或抛错、界面错误反馈和按钮恢复测试。系统打开使用替代依赖，Windows 资源管理器真实显示尚未验收。
+
+媒体导入准备：新增 5 项 media-decoder.test.js 测试；media-decoder.integration.cjs 用本机 FFmpeg 和合成 MP3/MP4 验证真实解码、无音轨拒绝和原文件不变，1 项通过。集成测试通过 ECHONOTE_TEST_FFMPEG 指定测试二进制，不使用真实用户媒体或调用云端。导入 UI 和持久化行为待数据策略确认后接入。
+
+## 导入功能最终验证
+
+52 项 npm test、npm run lint、1 项 npm run test:media 通过。新增时间戳冲突、音频/文本同目录、失败留音频、仅删除生成文件、导入录音互斥和删除期间防重入。tests/electron-import-smoke.cjs 在隐藏离屏 Electron 中加载包内代码与真实 FFmpeg，验证 UI/IPC/本地代理、音视频保存、预览、目录路由、取消、上游失败及原文件保护，结果通过且截图已检查。上游为替代响应，不能视为真实云端识别验收。

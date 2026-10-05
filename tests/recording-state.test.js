@@ -34,16 +34,18 @@ function setup() {
     window: {
       clearTimeout() {}, setTimeout() {}, clearInterval() {}, setInterval() {},
       echoNote: {
-        transcribeRecording() { submissions++; return new Promise(resolve => { resolveTranscript = resolve; }); },
+        onTaskProgress() {},
+        processRecording() { submissions++; return new Promise(resolve => { resolveTranscript = resolve; }); },
         saveRecording: async () => ({ markdownPath: 'test.md' })
       }
     }
   });
   vm.runInContext(fs.readFileSync(path.join(__dirname, '../src/renderer.js'), 'utf8'), context);
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '../src/import-media.js'), 'utf8'), context);
   vm.runInContext('serviceReady = true', context);
   return { context, node, start: () => context.startRecording(), stop: () => context.stopRecording(),
     accept: () => resolveCapture(stream), reject: () => rejectCapture(new Error('capture failed')),
-    finish: () => context.finishRecording(), complete: () => resolveTranscript({ text: 'test' }),
+    finish: () => context.finishRecording(), complete: () => resolveTranscript({ files: { directory: 'test', recordingPath: 'test/audio.webm', markdownPath: 'test/transcript.md' }, text: 'test' }),
     counts: () => ({ captures, stops, released, submissions }) };
 }
 
@@ -101,4 +103,52 @@ test('opening a result folder guards missing results and restores the button aft
   await x.context.openLastFolder();
   assert.match(x.node('toast').textContent, /无法打开/);
   assert.equal(x.node('openResultFolder').disabled, false);
+});
+
+test('import blocks simultaneous recording and repeated imports then displays transcript', async () => {
+  const x = setup();
+  let calls = 0;
+  let complete;
+  x.context.window.echoNote.importMedia = () => { calls++; return new Promise(resolve => { complete = resolve; }); };
+  const pending = x.context.importMedia();
+  await x.context.importMedia();
+  await x.start();
+  assert.equal(calls, 1);
+  assert.equal(x.counts().captures, 0);
+  assert.equal(x.node('importButton').disabled, true);
+  complete({ files: { directory: 'output/time', recordingPath: 'output/time/audio.wav', markdownPath: 'output/time/transcript.md' }, text: '导入文本' });
+  await pending;
+  assert.equal(x.node('transcriptPreview').textContent, '导入文本');
+  assert.equal(x.node('resultDetail').textContent, 'output/time');
+  assert.equal(x.node('recordButton').disabled, false);
+  assert.equal(x.node('importButton').disabled, false);
+});
+
+test('import cancellation and failure recover controls and retain audio-only results', async () => {
+  const x = setup();
+  x.context.window.echoNote.importMedia = async () => ({ canceled: true });
+  await x.context.importMedia();
+  assert.equal(x.node('importButton').disabled, false);
+  x.context.window.echoNote.importMedia = async () => ({ error: '转录失败', files: {
+    recordingPath: 'output/time/audio.wav', directory: 'output/time', markdownPath: null
+  } });
+  await x.context.importMedia();
+  assert.equal(x.node('resultTitle').textContent, '仅保存音频');
+  assert.match(x.node('recordHint').textContent, /音频已保留/);
+  assert.equal(x.node('importButton').disabled, false);
+});
+
+test('deleting a result blocks new recording and import until removal completes', async () => {
+  const x = setup();
+  let complete;
+  x.context.window.confirm = () => true;
+  x.context.window.echoNote.deleteRecording = () => new Promise(resolve => { complete = resolve; });
+  x.context.window.echoNote.importMedia = () => assert.fail('import must wait for deletion');
+  vm.runInContext("state.lastFiles = { recordingPath: 'audio.wav', markdownPath: 'text.md' }", x.context);
+  const pending = x.context.deleteLast();
+  await x.context.importMedia(); await x.start();
+  assert.equal(x.counts().captures, 0);
+  assert.equal(x.node('importButton').disabled, true);
+  complete({ folderRetained: false }); await pending;
+  assert.equal(x.node('importButton').disabled, false);
 });

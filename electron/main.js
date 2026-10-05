@@ -3,7 +3,9 @@ const { openResultFolder } = require('./result-folder');
 const { createBackground } = require('./background');
 const { createShortcuts } = require('./shortcuts');
 const { createDisplayMediaHandler } = require('./display-media');
-const fs = require('node:fs/promises');
+const { createSessionStore } = require('./session-store');
+const { createMediaDecoder, extensions } = require('./media-decoder');
+const { createTranscriptionTasks } = require('./transcription-tasks');
 const path = require('node:path');
 const { loadEnv } = require('../config/env');
 
@@ -11,7 +13,7 @@ const { createServiceSettings } = require('./service-settings');
 const { startLocalProxy } = require('./local-proxy');
 const serviceConfig = {};
 const serviceKeys = ['MAX_AUDIO_BYTES', 'VOLCENGINE_ASR_ENDPOINT', 'VOLCENGINE_ASR_RESOURCE_ID',
-  'VOLCENGINE_ASR_TIMEOUT_MS', 'ECHONOTE_PROXY_URL', 'ECHONOTE_PROXY_HOST'];
+  'VOLCENGINE_ASR_TIMEOUT_MS', 'ECHONOTE_PROXY_URL', 'ECHONOTE_PROXY_HOST', 'MAX_MEDIA_BYTES', 'MEDIA_DECODE_TIMEOUT_MS'];
 if (!app.isPackaged) loadEnv(path.join(__dirname, '..', '.env'), serviceKeys, serviceConfig);
 loadEnv(path.join(__dirname, '..', '.env.example'), serviceKeys, serviceConfig);
 let localProxy;
@@ -29,6 +31,8 @@ let mainWindow;
 let shortcuts;
 let background;
 let lastSavedFiles = null;
+let tasks;
+const sessionStore = createSessionStore();
 
 async function runRecordingShortcut(action) {
   if (!mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;
@@ -79,7 +83,10 @@ app.whenReady().then(async () => {
     error: proxyError || localProxy?.status().error || serviceSettings.status().error });
   ipcMain.handle('get-proxy-status', proxyStatus);
   ipcMain.handle('save-service-settings', async (_event, settings) => {
-    try { await serviceSettings.save(settings); return proxyStatus(); }
+    try {
+      if (tasks?.isBusy()) throw new Error('请等待当前任务结束后修改凭据');
+      await serviceSettings.save(settings); return proxyStatus();
+    }
     catch (error) { return { error: error.message }; }
   });
   shortcuts = createShortcuts({ registry: globalShortcut, filePath: path.join(app.getPath('userData'), 'shortcuts.json'), dispatch: runRecordingShortcut });
@@ -97,38 +104,47 @@ app.whenReady().then(async () => {
     return result.canceled ? null : result.filePaths[0];
   });
 
-  ipcMain.handle('save-recording', async (_event, { directory, buffer, baseName, transcript, includeTimestamps }) => {
-    if (!directory) throw new Error('请先配置保存目录');
-    await fs.mkdir(directory, { recursive: true });
-    const recordingPath = path.join(directory, `${baseName}.webm`);
-    const markdownPath = path.join(directory, `${baseName}.md`);
-    await fs.writeFile(recordingPath, Buffer.from(buffer));
-    const markdown = includeTimestamps ? `[${new Date().toLocaleTimeString()}] ${transcript}\n` : `${transcript}\n`;
-    await fs.writeFile(markdownPath, markdown, 'utf8');
-    lastSavedFiles = { recordingPath, markdownPath };
-    return lastSavedFiles;
+  const decoder = createMediaDecoder({
+    ffmpegPath: app.isPackaged ? path.join(process.resourcesPath, 'media', 'ffmpeg.exe')
+      : path.join(__dirname, '..', 'vendor', 'ffmpeg', 'ffmpeg.exe'),
+    maxAudioBytes: Number(serviceConfig.MAX_AUDIO_BYTES), maxMediaBytes: Number(serviceConfig.MAX_MEDIA_BYTES),
+    timeoutMs: Number(serviceConfig.MEDIA_DECODE_TIMEOUT_MS)
   });
-
-  ipcMain.handle('delete-recording', async (_event, { recordingPath, markdownPath }) => {
-    await Promise.all([fs.rm(recordingPath, { force: false }), fs.rm(markdownPath, { force: false })]);
-    if (lastSavedFiles?.markdownPath === markdownPath) lastSavedFiles = null;
-    return true;
+  tasks = createTranscriptionTasks({
+    store: sessionStore, decoder,
+    ensureConfigured() {
+      if (!localProxy?.status().running) throw new Error(proxyError || '本地转录服务未启动');
+      if (!serviceSettings.status().configured) throw new Error('请先在设置中填写火山引擎凭据');
+    },
+    selectMedia: async () => {
+      const result = await dialog.showOpenDialog(mainWindow, { title: '选择音频或视频', properties: ['openFile'],
+        filters: [{ name: '音频与视频', extensions }] });
+      return result.canceled ? null : result.filePaths[0];
+    },
+    transcribe: payload => localProxy.transcribe(payload),
+    onProgress: phase => {
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('task-progress', phase);
+    },
+    onResult: files => { lastSavedFiles = files; }
   });
-
-  ipcMain.handle('open-result-folder', () => openResultFolder(lastSavedFiles?.markdownPath, {
+  ipcMain.handle('process-recording', (_event, payload) => tasks.processRecording(payload));
+  ipcMain.handle('import-media', (_event, payload) => tasks.importMedia(payload));
+  ipcMain.handle('delete-recording', async () => {
+    if (tasks.isBusy()) throw new Error('请等待当前任务结束后删除');
+    const deletedFiles = lastSavedFiles;
+    const result = await sessionStore.deleteResult(deletedFiles);
+    if (lastSavedFiles === deletedFiles) lastSavedFiles = null;
+    return result;
+  });
+  ipcMain.handle('open-result-folder', () => openResultFolder(lastSavedFiles?.recordingPath, {
     openPath: directory => shell.openPath(directory)
   }));
-
-  ipcMain.handle('transcribe-recording', async (_event, payload) => {
-    if (!localProxy) throw new Error(proxyError || '本地转录服务未启动');
-    if (!serviceSettings.status().configured) throw new Error('请先在设置中填写火山引擎 APP ID 和 Access Token');
-    return localProxy.transcribe(payload);
-  });
   createWindow();
   background = createBackground({ app, window: mainWindow, Tray, Menu, nativeImage });
 }).catch(() => { dialog.showErrorBox('启动失败', 'EchoNote 初始化失败，请检查本地配置和目录权限'); app.quit(); });
 
 app.on('before-quit', event => {
+  tasks?.dispose();
   if (!localProxy || proxyClosed) return;
   event.preventDefault();
   if (closing) return;
