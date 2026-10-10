@@ -50,3 +50,5 @@
 52 项自动测试、语法检查，以及使用合成 MP3/MP4 的真实 FFmpeg 解码测试通过。上游响应在自动测试中被替代，不代表实际火山引擎账号识别成功。打包及 Electron 界面验证结果另记。
 
 包内实测通过：tests/electron-import-smoke.cjs 使用真实内置 FFmpeg、真实本地 HTTP 与替代上游，验证视频提取、时间戳目录、音频及文本、预览、取消、失败保留音频和删除保护。结果 dist/import-smoke/result.json，截图 dist/import-smoke/import-success.png；截图已检查。
+
+最终包 dist/media-import/EchoNote 0.1.0.exe 构建成功，包内全部业务 JavaScript 与当前源码一致。最后新增删除防重入后，52 项自动测试和语法检查通过；再次运行隐藏窗口测试因自动审批额度限制未执行。之前包内完整导入流程测试已通过。
