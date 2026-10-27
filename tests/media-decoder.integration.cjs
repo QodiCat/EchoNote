@@ -5,14 +5,17 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { createMediaDecoder } = require('../electron/media-decoder');
-const ffmpegPath = process.env.ECHONOTE_TEST_FFMPEG || path.join(__dirname, '..', 'vendor', 'ffmpeg', 'ffmpeg.exe');
+const ffmpegPath =
+  process.env.ECHONOTE_TEST_FFMPEG || path.join(__dirname, '..', 'vendor', 'ffmpeg', 'ffmpeg.exe');
 
-test('real FFmpeg extracts audio/video, rejects silent video, and leaves sources intact', async t => {
+test('real FFmpeg extracts audio/video, rejects silent video, and leaves sources intact', async (t) => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'echonote-real-media-'));
   t.after(() => fs.rm(dir, { recursive: true, force: true }));
-  const run = args => {
+  const run = (args) => {
     const result = spawnSync(ffmpegPath, ['-hide_banner', '-loglevel', 'error', ...args], {
-      windowsHide: true, timeout: 15000, encoding: 'utf8'
+      windowsHide: true,
+      timeout: 15000,
+      encoding: 'utf8',
     });
     assert.equal(result.status, 0, 'Unable to generate synthetic media fixture');
   };
@@ -20,11 +23,27 @@ test('real FFmpeg extracts audio/video, rejects silent video, and leaves sources
   const video = path.join(dir, '测试 视频.mp4');
   const silent = path.join(dir, '无音轨.mp4');
   run(['-f', 'lavfi', '-i', 'sine=frequency=440:duration=0.3', audio]);
-  run(['-f', 'lavfi', '-i', 'color=c=black:s=16x16:d=0.3', '-i', audio,
-    '-c:v', 'mpeg4', '-c:a', 'aac', '-shortest', video]);
+  run([
+    '-f',
+    'lavfi',
+    '-i',
+    'color=c=black:s=16x16:d=0.3',
+    '-i',
+    audio,
+    '-c:v',
+    'mpeg4',
+    '-c:a',
+    'aac',
+    '-shortest',
+    video,
+  ]);
   run(['-f', 'lavfi', '-i', 'color=c=black:s=16x16:d=0.3', '-an', '-c:v', 'mpeg4', silent]);
-  const decoder = createMediaDecoder({ ffmpegPath, maxAudioBytes: 1024 * 1024,
-    maxMediaBytes: 1024 * 1024, timeoutMs: 10000 });
+  const decoder = createMediaDecoder({
+    ffmpegPath,
+    maxAudioBytes: 1024 * 1024,
+    maxMediaBytes: 1024 * 1024,
+    timeoutMs: 10000,
+  });
   for (const input of [audio, video]) {
     const before = await fs.readFile(input);
     const wav = await decoder.decode(input);

@@ -8,3 +8,6 @@ dist-final/
 .env.*
 !.env.example
 vendor/ffmpeg/
+vendor/downloads/
+.npm-cache/
+%SystemDrive%/

@@ -8,16 +8,24 @@
     "start": "electron .",
     "dev": "electron .",
     "proxy:start": "node server/index.js",
-    "test": "node --check electron/main.js && node --check electron/preload.js && node --check src/renderer.js && node --test tests/*.test.js",
-    "lint": "node --check electron/main.js && node --check electron/background.js && node --check electron/preload.js && node --check electron/shortcuts.js && node --check src/renderer.js && node --check src/settings.js && node --check src/service-settings.js && node --check electron/service-settings.js && node --check electron/result-folder.js && node --check electron/local-proxy.js && node --check server/proxy.js && node --check server/index.js && node --check server/volcengine.js && node --check electron/media-decoder.js && node --check electron/session-store.js && node --check electron/transcription-tasks.js && node --check src/import-media.js && node --check scripts/prepare-media.js && node --check scripts/verify-media.js",
+    "test": "npm run check:source && node --test tests/*.test.js",
+    "lint": "npm run check:source && npm run format:check",
     "build": "electron-builder --win --x64",
     "media:prepare": "node scripts/prepare-media.js",
     "test:media": "node --test tests/media-decoder.integration.cjs",
-    "prebuild": "node scripts/verify-media.js"
+    "prebuild": "node scripts/verify-media.js",
+    "check:source": "node scripts/check-source.js",
+    "format": "prettier --write \"{electron,src,server,config,scripts,tests}/**/*.{js,cjs,css,html,json}\" package.json .prettierrc.json \".github/**/*.yml\"",
+    "format:check": "prettier --check \"{electron,src,server,config,scripts,tests}/**/*.{js,cjs,css,html,json}\" package.json .prettierrc.json \".github/**/*.yml\"",
+    "test:unit": "node --test tests/*.test.js",
+    "test:smoke": "node scripts/run-smoke.js",
+    "verify": "npm run lint && npm test && npm run test:media && npm run test:smoke",
+    "media:fetch": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/fetch-media.ps1"
   },
   "devDependencies": {
     "electron": "^38.1.0",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.0.12",
+    "prettier": "3.6.2"
   },
   "build": {
     "appId": "com.echonote.desktop",

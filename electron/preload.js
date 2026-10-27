@@ -12,7 +12,8 @@ contextBridge.exposeInMainWorld('echoNote', {
   deleteRecording: () => ipcRenderer.invoke('delete-recording'),
   openResultFolder: () => ipcRenderer.invoke('open-result-folder'),
   saveServiceSettings: (settings) => ipcRenderer.invoke('save-service-settings', settings),
+  getAudioLimits: () => ipcRenderer.invoke('get-audio-limits'),
   getProxyStatus: () => ipcRenderer.invoke('get-proxy-status'),
   getShortcuts: () => ipcRenderer.invoke('get-shortcuts'),
-  saveShortcuts: (settings) => ipcRenderer.invoke('save-shortcuts', settings)
+  saveShortcuts: (settings) => ipcRenderer.invoke('save-shortcuts', settings),
 });

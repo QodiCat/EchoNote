@@ -11,32 +11,109 @@
   <body>
     <main class="app-shell">
       <section class="workspace">
-        <header class="topbar"><h1><img class="brand-icon" src="./assets/echonote.png" alt="" width="36" height="36" />EchoNote</h1><button id="settingsButton" class="icon-button" aria-label="打开设置">设置</button></header>
-        <div id="setupBanner" class="setup-banner hidden"><span>录音前请选择保存目录</span><button id="setupButton" class="text-button">选择目录</button></div>
+        <header class="topbar">
+          <h1>
+            <img
+              class="brand-icon"
+              src="./assets/echonote.png"
+              alt=""
+              width="36"
+              height="36"
+            />EchoNote
+          </h1>
+          <button id="settingsButton" class="icon-button" aria-label="打开设置">设置</button>
+        </header>
+        <div id="setupBanner" class="setup-banner hidden">
+          <span>录音前请选择保存目录</span
+          ><button id="setupButton" class="text-button">选择目录</button>
+        </div>
         <section id="record-card" class="record-card">
-          <div class="record-card-top"><span id="statusPill" class="status-pill" role="status"><span class="status-dot"></span> 就绪</span><span class="source-label">系统声音 · 不录麦克风</span></div>
-          <div class="record-center"><span id="recordingTimer" class="timer" aria-label="录音时长">00:00</span><h2 id="recordTitle">待录音</h2><p id="recordHint">停止后自动转录</p></div>
-          <div class="record-actions"><button id="recordButton" class="record-button"><span id="recordButtonIcon">●</span><span id="recordButtonText">开始录音</span></button><button id="importButton" class="small-button" type="button">导入音频 / 视频</button><button id="stopButton" class="stop-button" disabled>停止录音</button></div>
+          <div class="record-card-top">
+            <span id="statusPill" class="status-pill" role="status"
+              ><span class="status-dot"></span> 就绪</span
+            ><span class="source-label">系统声音 · 不录麦克风</span>
+          </div>
+          <div class="record-center">
+            <span id="recordingTimer" class="timer" aria-label="录音时长">00:00</span>
+            <h2 id="recordTitle">待录音</h2>
+            <p id="recordHint">停止后自动转录</p>
+          </div>
+          <div class="record-actions">
+            <button id="recordButton" class="record-button">
+              <span id="recordButtonIcon">●</span
+              ><span id="recordButtonText">开始录音</span></button
+            ><button id="importButton" class="small-button" type="button">导入音频 / 视频</button
+            ><button id="stopButton" class="stop-button" disabled>停止录音</button>
+          </div>
         </section>
         <section class="bottom-grid">
-          <div class="panel"><div class="panel-heading"><h3>保存设置</h3></div><label class="switch-row"><span>Markdown 包含记录时间</span><input id="timestampToggle" type="checkbox" /></label><div class="folder-row"><div class="folder-copy"><small>保存目录</small><strong id="folderPath">尚未设置</strong></div><button id="folderButton" class="small-button">更改</button></div></div>
-          <div class="panel"><div class="panel-heading"><h3>最近一次结果</h3><span id="activityStatus" class="activity-label"></span></div><div id="activityEmpty" class="activity-empty">暂无转录结果</div><div id="activityResult" class="activity-result hidden"><div><strong id="resultTitle">转录完成</strong><small id="resultDetail"></small></div><button id="openResultFolder" class="small-button" type="button">打开文件夹</button><button id="deleteButton" class="delete-button">删除</button></div></div>
+          <div class="panel">
+            <div class="panel-heading"><h3>保存设置</h3></div>
+            <label class="switch-row"
+              ><span>Markdown 包含记录时间</span><input id="timestampToggle" type="checkbox"
+            /></label>
+            <div class="folder-row">
+              <div class="folder-copy">
+                <small>保存目录</small><strong id="folderPath">尚未设置</strong>
+              </div>
+              <button id="folderButton" class="small-button">更改</button>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-heading">
+              <h3>最近一次结果</h3>
+              <span id="activityStatus" class="activity-label"></span>
+            </div>
+            <div id="activityEmpty" class="activity-empty">暂无转录结果</div>
+            <div id="activityResult" class="activity-result hidden">
+              <div><strong id="resultTitle">转录完成</strong><small id="resultDetail"></small></div>
+              <button id="openResultFolder" class="small-button" type="button">打开文件夹</button
+              ><button id="deleteButton" class="delete-button">删除</button>
+            </div>
+          </div>
         </section>
-        <section id="transcriptPanel" class="panel transcript-panel hidden"><h3>转录文本</h3><pre id="transcriptPreview" class="transcript-preview"></pre></section>
+        <section id="transcriptPanel" class="panel transcript-panel hidden">
+          <h3>转录文本</h3>
+          <pre id="transcriptPreview" class="transcript-preview"></pre>
+        </section>
       </section>
     </main>
     <div id="toast" class="toast" role="status"></div>
     <dialog id="settingsDialog" class="settings-dialog" aria-labelledby="settingsTitle">
-        <div class="settings-heading"><h2 id="settingsTitle">设置</h2><button id="closeSettings" type="button" class="icon-button" aria-label="关闭设置">×</button></div>
+      <div class="settings-heading">
+        <h2 id="settingsTitle">设置</h2>
+        <button id="closeSettings" type="button" class="icon-button" aria-label="关闭设置">
+          ×
+        </button>
+      </div>
       <form id="serviceForm">
         <h3>火山引擎转录</h3>
-        <p class="settings-help">填写已开通录音文件识别极速版服务的 APP ID 和 Access Token（不是 Secret Key）。凭据加密保存在当前 Windows 用户的本地目录。</p>
+        <p class="settings-help">
+          填写已开通录音文件识别极速版服务的 APP ID 和 Access Token（不是 Secret
+          Key）。凭据加密保存在当前 Windows 用户的本地目录。
+        </p>
         <p id="serviceStatus" class="settings-help" role="status">正在检查转录配置…</p>
         <label for="serviceAppId">APP ID</label>
-        <input id="serviceAppId" type="text" maxlength="200" autocomplete="off" spellcheck="false" required />
+        <input
+          id="serviceAppId"
+          type="text"
+          maxlength="200"
+          autocomplete="off"
+          spellcheck="false"
+          required
+        />
         <label for="serviceAccessToken">Access Token</label>
-        <input id="serviceAccessToken" type="password" maxlength="4096" autocomplete="off" spellcheck="false" required />
-        <p class="settings-help">已保存的凭据不会回显。更换时请重新填写两项；保存后立即生效。录音停止后会发送到火山引擎进行识别。</p>
+        <input
+          id="serviceAccessToken"
+          type="password"
+          maxlength="4096"
+          autocomplete="off"
+          spellcheck="false"
+          required
+        />
+        <p class="settings-help">
+          已保存的凭据不会回显。更换时请重新填写两项；保存后立即生效。录音停止后会发送到火山引擎进行识别。
+        </p>
         <p id="serviceError" class="settings-error" role="alert"></p>
         <button id="saveService" type="submit" class="small-button">保存转录凭据</button>
       </form>
@@ -44,12 +121,33 @@
         <h3>录音快捷键</h3>
         <p class="settings-help">后台可用，触发时显示录音窗口。</p>
         <label for="startShortcut">开始录音</label>
-        <input id="startShortcut" type="text" placeholder="例如 Ctrl+Alt+R" maxlength="80" autocomplete="off" spellcheck="false" aria-describedby="shortcutHelp" />
+        <input
+          id="startShortcut"
+          type="text"
+          placeholder="例如 Ctrl+Alt+R"
+          maxlength="80"
+          autocomplete="off"
+          spellcheck="false"
+          aria-describedby="shortcutHelp"
+        />
         <label for="stopShortcut">结束录音</label>
-        <input id="stopShortcut" type="text" placeholder="例如 Ctrl+Alt+S" maxlength="80" autocomplete="off" spellcheck="false" aria-describedby="shortcutHelp" />
-        <p id="shortcutHelp" class="settings-help">Ctrl 或 Alt + 字母、数字、F1–F24，可加 Shift。留空保存即关闭。</p>
+        <input
+          id="stopShortcut"
+          type="text"
+          placeholder="例如 Ctrl+Alt+S"
+          maxlength="80"
+          autocomplete="off"
+          spellcheck="false"
+          aria-describedby="shortcutHelp"
+        />
+        <p id="shortcutHelp" class="settings-help">
+          Ctrl 或 Alt + 字母、数字、F1–F24，可加 Shift。留空保存即关闭。
+        </p>
         <p id="shortcutError" class="settings-error" role="alert"></p>
-        <div class="settings-actions"><button id="settingsFolder" type="button" class="small-button">更改保存目录</button><button id="saveShortcuts" type="submit" class="record-button">保存快捷键</button></div>
+        <div class="settings-actions">
+          <button id="settingsFolder" type="button" class="small-button">更改保存目录</button
+          ><button id="saveShortcuts" type="submit" class="record-button">保存快捷键</button>
+        </div>
       </form>
     </dialog>
     <script src="./audio-format.js"></script>
@@ -57,5 +155,6 @@
     <script src="./import-media.js"></script>
     <script src="./settings.js"></script>
     <script src="./service-settings.js"></script>
+    <script src="./bootstrap.js"></script>
   </body>
 </html>

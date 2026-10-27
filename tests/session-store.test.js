@@ -16,7 +16,7 @@ test('timestamps use local date/time with milliseconds', () => {
   assert.throws(() => timestampName('invalid'), /时间无效/);
 });
 
-test('every task gets a new directory even with identical timestamps', async t => {
+test('every task gets a new directory even with identical timestamps', async (t) => {
   const directory = await fixture(t);
   const store = createSessionStore();
   const input = { directory, buffer: Buffer.from('audio'), format: 'wav', startedAt: 1234567890 };
@@ -29,7 +29,7 @@ test('every task gets a new directory even with identical timestamps', async t =
   assert.equal(await fs.readFile(two.recordingPath, 'utf8'), 'audio');
 });
 
-test('deleting a result never removes the imported source or other user files', async t => {
+test('deleting a result never removes the imported source or other user files', async (t) => {
   const directory = await fixture(t);
   const source = path.join(directory, 'source.mp4');
   await fs.writeFile(source, 'original');
@@ -43,7 +43,7 @@ test('deleting a result never removes the imported source or other user files', 
   await assert.rejects(store.deleteResult({ recordingPath: source }), /不存在|没有可删除/);
 });
 
-test('audio-only results can be removed along with their empty task directory', async t => {
+test('audio-only results can be removed along with their empty task directory', async (t) => {
   const directory = await fixture(t);
   const store = createSessionStore();
   const result = await store.saveAudio({ directory, buffer: Buffer.from('webm'), format: 'webm' });
@@ -51,12 +51,17 @@ test('audio-only results can be removed along with their empty task directory', 
   assert.deepEqual(await fs.readdir(directory), []);
 });
 
-test('text write failure keeps the saved audio and reports the failure', async t => {
+test('text write failure keeps the saved audio and reports the failure', async (t) => {
   const directory = await fixture(t);
-  const store = createSessionStore({ io: { ...fs, writeFile: async (file, ...args) => {
-    if (file.endsWith('.md')) throw new Error('disk full');
-    return fs.writeFile(file, ...args);
-  } } });
+  const store = createSessionStore({
+    io: {
+      ...fs,
+      writeFile: async (file, ...args) => {
+        if (file.endsWith('.md')) throw new Error('disk full');
+        return fs.writeFile(file, ...args);
+      },
+    },
+  });
   const result = await store.saveAudio({ directory, buffer: Buffer.from('audio'), format: 'wav' });
   await assert.rejects(store.saveTranscript(result, 'text', false), /文本保存失败/);
   assert.equal(result.markdownPath, null);

@@ -31,7 +31,15 @@
 
 ## 媒体组件准备与构建
 
-在线 ffmpeg-static 二进制下载超时，本次使用本机既有的 Gyan FFmpeg 7.0.2 静态 Windows 构建，未引入 ffmpeg-static 运行依赖。
+固定使用 Gyan FFmpeg 7.0.2 full 静态 Windows 构建。`config/media-lock.json` 将二进制、许可证和来源说明的 SHA-256 纳入版本控制；不会因本机生成的 manifest 改变而接受其他二进制。
+
+新机器安装 7-Zip 后运行：
+
+    npm run media:fetch -- -SevenZip "C:/Program Files/7-Zip/7z.exe"
+    npm run verify
+    npm run build
+
+下载地址在 `.env.example` 的 `FFMPEG_ARCHIVE_URL`，固定到 7.0.2 发布；不使用 latest。脚本下载到被忽略的 `vendor/downloads/`，解压后调用准备脚本；准备脚本在执行二进制前核对三个文件的仓库锁定哈希。下载、解压或哈希错误均明确失败。版本升级需要人工更新锁和验证证据。
 
 从可信来源获取带 bin/ffmpeg.exe、LICENSE、README.txt 的 Windows 静态构建后运行：
 
@@ -39,13 +47,25 @@
     npm run test:media
     npm run build -- --config.directories.output=dist/media-import
 
-准备脚本复制可执行文件、许可证与来源说明，记录版本及 SHA-256 到 vendor/ffmpeg/manifest.json。该生成目录已被 Git 忽略，不应提交二进制。prebuild 校验后，electron-builder 将组件放入 resources/media；开发时从 vendor/ffmpeg 读取。用户端不依赖 PATH 中安装的 FFmpeg。
+准备脚本校验固定版本后复制可执行文件、许可证与来源说明，并记录 manifest。prebuild 再次对照仓库锁和 manifest 校验，electron-builder 将组件放入 resources/media；开发时从 vendor/ffmpeg 读取。生成目录被 Git 忽略，用户端不依赖 PATH 中安装的 FFmpeg。
+
+2026-10-12：已在本机从固定发布地址下载、解压和准备成功。录音仍使用浏览器 WebM 解码，导入使用 FFmpeg；两者统一 WAV 格式、MAX_AUDIO_BYTES 和任务编排。录音累计块超限会停止并明确失败，不提交截断音频；解码前按录音时间预检，分配 WAV 前及主进程另有校验。整段处理和多份内存副本仍存在，未实现自动分段。
 
 ## 第三方组件
 
 本次 FFmpeg 来源构建说明和 GPL v3 许可证随包保留在 resources/media/README.txt 和 LICENSE；版本及哈希在 manifest.json。构建来源：https://www.gyan.dev/ffmpeg/builds/ ，对应 FFmpeg 源码：https://github.com/FFmpeg/FFmpeg/commit/e3a61e9103 。FFmpeg 命令选项参考：https://ffmpeg.org/ffmpeg.html 。对外再分发时需遵守随附许可证；本次没有修改该二进制。
 
 ## 验证
+
+### 2026-10-27：间歇性组件启动失败排查
+
+用户反馈长时间使用后出现“无法启动音频提取组件，请重新安装应用”。该提示对应子进程启动异常，不代表输入媒体损坏，也不能单凭此提示确定需要重装。原实现未区分系统错误码；目前没有故障现场错误码或长时间复现证据，根因尚未确认。
+
+启动 FFmpeg 时现在显式使用组件所在目录作为工作目录，避免依赖继承的工作目录。同步抛出和异步启动异常均按错误码提示：ENOENT 表示组件或运行目录丢失，EACCES/EPERM 表示访问被拒绝，ENOMEM 表示内存不足，EAGAIN/EMFILE/ENFILE 表示系统资源暂时不足；其他错误显示 UNKNOWN。不显示原始异常中的文件路径。此改动不自动重试、不改动录音保存或传输策略，也不恢复已被清理的组件。
+
+如果再次出现，请保留完整提示及错误码。可先通过托盘“退出”完全结束应用，再重新启动便携版；只关闭窗口会进入后台。ENOENT 持续出现时检查安全软件隔离记录和便携版解压目录，权限错误检查目录权限，资源不足则释放资源后重试。
+
+本次 `npm test`（61 项）、`npm run lint`、`npm run test:media`（真实 FFmpeg）通过。新增测试覆盖七类系统错误、未知错误脱敏，以及异步/同步启动失败后的再次导入。尚未验证长时间运行场景，尚未构建包含本次变更的发布包。
 
 52 项自动测试、语法检查，以及使用合成 MP3/MP4 的真实 FFmpeg 解码测试通过。上游响应在自动测试中被替代，不代表实际火山引擎账号识别成功。打包及 Electron 界面验证结果另记。
 

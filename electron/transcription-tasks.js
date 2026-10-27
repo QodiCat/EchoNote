@@ -1,7 +1,18 @@
-function createTranscriptionTasks({ store, decoder, selectMedia, ensureConfigured, transcribe, onProgress = () => {}, onResult = () => {} }) {
+function createTranscriptionTasks({
+  store,
+  decoder,
+  selectMedia,
+  ensureConfigured,
+  transcribe,
+  onProgress = () => {},
+  onResult = () => {},
+  maxAudioBytes = Number.MAX_SAFE_INTEGER,
+}) {
   let busy = false;
   let disposed = false;
-  function checkActive() { if (disposed) throw new Error('应用正在退出'); }
+  function checkActive() {
+    if (disposed) throw new Error('应用正在退出');
+  }
   async function run(kind, payload) {
     if (busy || disposed) return { error: '已有任务正在处理或应用正在退出' };
     busy = true;
@@ -23,17 +34,30 @@ function createTranscriptionTasks({ store, decoder, selectMedia, ensureConfigure
       } else {
         audio = Buffer.from(payload.buffer);
         wav = Buffer.from(payload.wavBuffer);
-        if (wav.length < 44 || wav.toString('ascii', 0, 4) !== 'RIFF' || wav.toString('ascii', 8, 12) !== 'WAVE') {
+        if (
+          wav.length < 44 ||
+          wav.toString('ascii', 0, 4) !== 'RIFF' ||
+          wav.toString('ascii', 8, 12) !== 'WAVE'
+        ) {
           throw new Error('录音转换失败，未提交转录');
         }
       }
+      if (wav.length > maxAudioBytes || audio.length > maxAudioBytes)
+        throw new Error('音频超过转录大小限制');
       checkActive();
       onProgress('saving-audio');
-      files = await store.saveAudio({ directory: payload.directory, buffer: audio,
-        format: kind === 'import' ? 'wav' : 'webm', startedAt });
+      files = await store.saveAudio({
+        directory: payload.directory,
+        buffer: audio,
+        format: kind === 'import' ? 'wav' : 'webm',
+        startedAt,
+      });
       checkActive();
       onProgress('transcribing');
-      const result = await transcribe({ buffer: wav, includeTimestamps: payload.includeTimestamps });
+      const result = await transcribe({
+        buffer: wav,
+        includeTimestamps: payload.includeTimestamps,
+      });
       checkActive();
       onProgress('saving-text');
       await store.saveTranscript(files, result.text, payload.includeTimestamps);
@@ -42,13 +66,18 @@ function createTranscriptionTasks({ store, decoder, selectMedia, ensureConfigure
     } catch (error) {
       if (files) onResult(files);
       return { error: error.message || '本次处理失败', files };
-    } finally { busy = false; }
+    } finally {
+      busy = false;
+    }
   }
   return {
-    importMedia: payload => run('import', payload),
-    processRecording: payload => run('recording', payload),
+    importMedia: (payload) => run('import', payload),
+    processRecording: (payload) => run('recording', payload),
     isBusy: () => busy,
-    dispose() { disposed = true; decoder.dispose(); }
+    dispose() {
+      disposed = true;
+      decoder.dispose();
+    },
   };
 }
 module.exports = { createTranscriptionTasks };

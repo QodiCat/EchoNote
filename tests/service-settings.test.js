@@ -23,13 +23,13 @@ async function fixture(t) {
       const cipher = crypto.createDecipheriv('aes-256-gcm', key, value.subarray(0, 12));
       cipher.setAuthTag(value.subarray(12, 28));
       return Buffer.concat([cipher.update(value.subarray(28)), cipher.final()]).toString();
-    }
+    },
   };
   const filePath = path.join(dir, 'transcription.env');
   return { filePath, safeStorage, create: () => createServiceSettings({ filePath, safeStorage }) };
 }
 
-test('credentials are encrypted on disk, restored after restart, and absent from status', async t => {
+test('credentials are encrypted on disk, restored after restart, and absent from status', async (t) => {
   const f = await fixture(t);
   const store = f.create();
   assert.equal((await store.initialize()).configured, false);
@@ -46,7 +46,7 @@ test('credentials are encrypted on disk, restored after restart, and absent from
   assert.equal(restarted.config().VOLCENGINE_ASR_ACCESS_KEY, 'replacement');
 });
 
-test('encryption and validation failures do not replace working credentials', async t => {
+test('encryption and validation failures do not replace working credentials', async (t) => {
   const f = await fixture(t);
   const store = f.create();
   await store.save({ appId: '123', accessToken: 'first' });
@@ -56,7 +56,7 @@ test('encryption and validation failures do not replace working credentials', as
   assert.equal(store.config().VOLCENGINE_ASR_ACCESS_KEY, 'first');
 });
 
-test('corrupt files surface errors and can be replaced by user input', async t => {
+test('corrupt files surface errors and can be replaced by user input', async (t) => {
   const f = await fixture(t);
   await fs.writeFile(f.filePath, 'CREDENTIALS_ENCRYPTED=invalid');
   const store = f.create();
@@ -65,7 +65,7 @@ test('corrupt files surface errors and can be replaced by user input', async t =
   assert.deepEqual(store.status(), { configured: true, error: '' });
 });
 
-test('disk failures do not apply unsaved credentials', async t => {
+test('disk failures do not apply unsaved credentials', async (t) => {
   const f = await fixture(t);
   const store = f.create();
   await store.save({ appId: '123', accessToken: 'first' });

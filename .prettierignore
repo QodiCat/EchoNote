@@ -1,0 +1,6 @@
+node_modules/
+dist/
+vendor/
+.npm-cache/
+package-lock.json
+%SystemDrive%/

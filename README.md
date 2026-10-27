@@ -13,6 +13,7 @@ Windows 系统声音录音与转录桌面应用，使用 Electron + 原生 HTML/
 
 ## 当前进度
 
+- 2026-10-12：完成工程结构修复：统一格式、界面模块显式初始化、快捷键录音命令接口、录音大小保护、固定 FFmpeg 版本/哈希和 Windows CI。完整验证入口为 `npm run verify`，构建包为 `dist/structure-review/EchoNote 0.1.1.exe`。此前日期记录为历史证据，真实系统声音与云端识别仍待专项验收。
 - 2026-10-08：版本更新为 `0.1.1`，用于区分此前 `0.1.0` 打包产物。
 
 - 2026-10-05：桌面自动管理本地代理，设置中加密保存 APP ID / Access Token。30 项测试、语法检查和包内界面/Windows 加密验证通过；新包为 `dist/managed-proxy/EchoNote 0.1.0.exe`。
@@ -39,3 +40,9 @@ Windows 系统声音录音与转录桌面应用，使用 Electron + 原生 HTML/
 ## 本地文件导入与独立文件夹
 
 点击“导入音频 / 视频”转录本地文件；视频先提取音频。录音和导入分别创建时间戳文件夹，保存音频与 Markdown，转录失败时保留已保存的音频。详细使用、媒体组件准备和验证说明见 [媒体导入](docs/media-import.md)。
+
+## 工程验证
+
+首次开发或构建需准备固定版本 FFmpeg；可执行 `npm run media:fetch -- -SevenZip "C:/Program Files/7-Zip/7z.exe"`，或按媒体导入文档使用已解压的固定版本。该流程需要网络和 7-Zip，`npm install` 不会自动下载媒体组件。
+
+`npm run format` 统一格式；`npm run lint` 检查全部源码/测试语法、500 行限制和格式；`npm test` 运行单元测试；`npm run verify` 再包含真实媒体集成和隐藏 Electron 窗口验证。CI 执行相同门禁并验证构建包，远端结果需推送后确认。

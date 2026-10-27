@@ -10,8 +10,12 @@ async function openResultFolder(markdownPath, { openPath, stat = fs.stat }) {
     if (error) return { error: '无法打开转录文件夹，请检查目录权限' };
     return { opened: true };
   } catch (error) {
-    return { error: error.code === 'ENOENT'
-      ? '转录文件夹不存在或已被移动' : '无法打开转录文件夹，请检查目录权限' };
+    return {
+      error:
+        error.code === 'ENOENT'
+          ? '转录文件夹不存在或已被移动'
+          : '无法打开转录文件夹，请检查目录权限',
+    };
   }
 }
 

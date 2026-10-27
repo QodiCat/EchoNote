@@ -11,7 +11,8 @@ function timestampName(value) {
 function createSessionStore({ io = fs } = {}) {
   const sessions = new WeakSet();
   async function saveAudio({ directory, buffer, format, startedAt = Date.now() }) {
-    if (typeof directory !== 'string' || !path.isAbsolute(directory)) throw new Error('请先选择有效的保存目录');
+    if (typeof directory !== 'string' || !path.isAbsolute(directory))
+      throw new Error('请先选择有效的保存目录');
     if (!['wav', 'webm'].includes(format)) throw new Error('保存音频格式无效');
     const audio = Buffer.from(buffer);
     if (!audio.length) throw new Error('音频内容为空');
@@ -19,15 +20,24 @@ function createSessionStore({ io = fs } = {}) {
     await io.mkdir(directory, { recursive: true });
     let sessionDirectory;
     for (let suffix = 0; suffix < 1000; suffix++) {
-      sessionDirectory = path.join(directory, `${name}${suffix ? `_${String(suffix).padStart(3, '0')}` : ''}`);
-      try { await io.mkdir(sessionDirectory); break; }
-      catch (error) {
-        if (error.code !== 'EEXIST' || suffix === 999) throw new Error('无法创建本次任务文件夹，请检查目录权限');
+      sessionDirectory = path.join(
+        directory,
+        `${name}${suffix ? `_${String(suffix).padStart(3, '0')}` : ''}`,
+      );
+      try {
+        await io.mkdir(sessionDirectory);
+        break;
+      } catch (error) {
+        if (error.code !== 'EEXIST' || suffix === 999)
+          throw new Error('无法创建本次任务文件夹，请检查目录权限');
       }
     }
     const recordingPath = path.join(sessionDirectory, `audio.${format}`);
-    try { await io.writeFile(recordingPath, audio, { flag: 'wx' }); }
-    catch { throw new Error(`音频保存失败，请检查磁盘空间和目录权限：${sessionDirectory}`); }
+    try {
+      await io.writeFile(recordingPath, audio, { flag: 'wx' });
+    } catch {
+      throw new Error(`音频保存失败，请检查磁盘空间和目录权限：${sessionDirectory}`);
+    }
     const result = { directory: sessionDirectory, recordingPath, markdownPath: null };
     sessions.add(result);
     return result;
@@ -36,9 +46,14 @@ function createSessionStore({ io = fs } = {}) {
     if (!sessions.has(result)) throw new Error('任务不存在');
     if (typeof text !== 'string') throw new Error('转录结果格式无效');
     const markdownPath = path.join(result.directory, 'transcript.md');
-    const markdown = includeTimestamps ? `[${new Date().toLocaleTimeString()}] ${text}\n` : `${text}\n`;
-    try { await io.writeFile(markdownPath, markdown, { flag: 'wx' }); }
-    catch { throw new Error('文本保存失败，音频已保留，请检查磁盘空间和目录权限'); }
+    const markdown = includeTimestamps
+      ? `[${new Date().toLocaleTimeString()}] ${text}\n`
+      : `${text}\n`;
+    try {
+      await io.writeFile(markdownPath, markdown, { flag: 'wx' });
+    } catch {
+      throw new Error('文本保存失败，音频已保留，请检查磁盘空间和目录权限');
+    }
     result.markdownPath = markdownPath;
     return result;
   }
@@ -48,8 +63,9 @@ function createSessionStore({ io = fs } = {}) {
     await io.rm(result.recordingPath, { force: true });
     if (result.markdownPath) await io.rm(result.markdownPath, { force: true });
     let folderRetained = false;
-    try { await io.rmdir(result.directory); }
-    catch (error) {
+    try {
+      await io.rmdir(result.directory);
+    } catch (error) {
       if (error.code === 'ENOTEMPTY' || error.code === 'EEXIST') folderRetained = true;
       else if (error.code !== 'ENOENT') throw error;
     }

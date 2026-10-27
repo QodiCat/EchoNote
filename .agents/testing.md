@@ -1,47 +1,42 @@
 # 测试与验证
 
-## 本轮结果（2026-09-22）
+核对日期：2026-10-12。
 
-执行 npm test：19 项通过。执行 npm run lint：通过，当前仅检查 package.json 中列出的 JavaScript 语法，并非完整静态分析。
+## 验证入口
 
-| 测试文件 | 项数 | 覆盖 |
-| --- | --- | --- |
-| display-media.test.js | 3 | 有效来源、空来源、枚举异常 |
-| env.test.js | 2 | 白名单、环境优先级、缺失文件与读取异常 |
-| recording-state.test.js | 2 | 连续开始/停止防重入、转录中不新建任务、失败恢复 |
-| shortcuts.test.js | 5 | 校验、冲突、保存失败回滚、重启恢复、注销 |
-| transcription.test.js | 7 | WAV 编码、JSON 请求、状态码、错误脱敏、异常响应 |
+| 命令 | 范围 |
+| --- | --- |
+| npm test | 自动遍历源码/测试语法、500 行门禁、单元测试 |
+| npm run lint | 自动语法/行数检查及 Prettier 格式检查 |
+| npm run format | 格式化源码、测试、JSON 和 CI 配置 |
+| npm run test:media | 真实 FFmpeg 与合成音视频集成测试 |
+| npm run test:smoke | 隐藏 Electron、Windows safeStorage、界面/IPC/本地代理及导入验证 |
+| npm run test:smoke -- <app.asar路径> | 对构建包运行相同验证 |
+| npm run verify | 顺序执行 lint、单元、媒体、Electron 验证 |
+| npm run build | 校验固定媒体组件并生成 Windows x64 portable |
 
-这些测试使用替代依赖或模拟响应，不是真实系统声音、操作系统快捷键或火山引擎识别验收。
+npm test 不自动启动 Electron；完整本地门禁使用 verify。媒体组件缺失时集成测试明确失败，不静默跳过。lint 尚不是 ESLint 语义分析或类型检查。
 
-## 实际联调证据
+## 本轮证据
 
-用户确认已启动试用界面，并提供过转录调用报错。最近一次为 HTTP 403 / 45000030；尚无成功转录、保存或删除的用户证据。旧记录称代理健康检查通过，本轮未复测。
+59 项单元测试：原有覆盖及模块注册顺序/全局隔离、录音超限不提交截断内容、无效限制、WAV 分配前保护、任务层超限、快捷键命令/用户手势、媒体锁定哈希。
 
-UI 已精简；上轮 Browser 连接没有可用浏览器，未完成视觉检查。存在 dist* 临时资源不代表构建成功。本轮未运行 npm run build。未发现 CI 配置。
+1 项真实 FFmpeg 集成测试覆盖音频、视频、无音轨拒绝及原文件保护。两个隐藏 Electron 测试覆盖真实 Windows 加密、凭据重载、表单 IPC、代理启停、导入目录、预览、取消、失败保留已保存音频及删除保护。
 
-## 尚需验证
+仅使用合成媒体/凭据和替代上游，没有向云端发送用户录音。受限环境 GPU 子进程不可用，已在普通 Windows 环境完成隐藏窗口验证；结果 dist/smoke/result.json 与 dist/import-smoke/result.json。
 
-- Windows 10+ 系统声音采集、无麦克风采集、静音与权限失败。
-- 开始、停止、处理中、成功和失败状态；后台快捷键与弹窗行为。
-- 中文/英文与标点，真实上游成功响应、超时和网络断开。
-- 同一目录写入 WebM/Markdown、重启恢复目录、时间选项实际语义。
-- 磁盘不足、文件冲突、部分保存与部分删除的可见反馈和恢复。
-- 长录音限制、代理中断、部署日志和数据不持久化约束。
-- Windows x64 portable 构建及独立运行；不包含自动更新。
+固定 FFmpeg 下载、解压、三文件哈希和准备流程已在本机验证成功。构建和新包验证结果见本轮最终追加记录。
 
-验收目标见 .product/phase-1/echonote-v1-prd.md；未通过的项目不得记为完成。
+## CI 与边界
 
-## 2026-10-05 增量验证
+.github/workflows/verify.yml 使用 Windows、Node.js 24，执行 npm ci、lint、单元、固定 FFmpeg 准备、媒体、Electron、构建及包内 Electron 验证。配置已落地，远端运行需推送后确认。
 
-30 项自动测试和扩展语法检查通过。新增代理真实本机 HTTP 启停、动态凭据、鉴权、413、错误脱敏测试；凭据存储接口替身的持久化/恢复/损坏/保存失败测试；未配置禁止录音。npm run build 的原输出目录因 EPERM 无法替换，改用 --config.directories.output=dist/managed-proxy 构建通过。包内含代理和 .env.example，不含 .env。真实 safeStorage 与界面由 tests/electron-smoke.cjs 单独验证，结果另记。真实音频和火山引擎账号仍待验收。
+真实系统声音、操作系统快捷键、真实火山引擎账号权限/质量、长音频内存和实际用户发布包运行仍需专项验收。测试通过不能补充整体产品批准记录。
 
-最终实测：Electron 隐藏窗口读取构建后的 app.asar，真实 Windows safeStorage 加密、凭据重载、设置表单 IPC、输入清空、代理启动/关闭均通过。仅使用合成凭据，不发送音频。截图 dist/smoke/settings.png 已检查，结果 dist/smoke/result.json。受限环境 GPU 子进程失败后，在普通 Windows 环境验证通过。真实系统录音和云端转录仍待验收。
+## 本轮最终验证
 
-2026-10-05 打开文件夹增量：34 项自动测试和语法检查通过。新增中文/空格目录、无结果、目录移动、shell 返回错误或抛错、界面错误反馈和按钮恢复测试。系统打开使用替代依赖，Windows 资源管理器真实显示尚未验收。
+2026-10-12：npm run verify 完整通过，59 项单元、1 项真实媒体集成及 2 个隐藏 Electron 测试全部通过；格式、全部脚本语法和 500 行门禁通过。
 
-媒体导入准备：新增 5 项 media-decoder.test.js 测试；media-decoder.integration.cjs 用本机 FFmpeg 和合成 MP3/MP4 验证真实解码、无音轨拒绝和原文件不变，1 项通过。集成测试通过 ECHONOTE_TEST_FFMPEG 指定测试二进制，不使用真实用户媒体或调用云端。导入 UI 和持久化行为待数据策略确认后接入。
+npm run build -- --config.directories.output=dist/structure-review 通过，生成 dist/structure-review/EchoNote 0.1.1.exe。对新包 app.asar 运行 npm run test:smoke -- dist/structure-review/win-unpacked/resources/app.asar，两项测试均通过。包内导入成功截图已检查，界面无明显布局异常；证据位于 dist/smoke 和 dist/import-smoke。
 
-## 导入功能最终验证
-
-52 项 npm test、npm run lint、1 项 npm run test:media 通过。新增时间戳冲突、音频/文本同目录、失败留音频、仅删除生成文件、导入录音互斥和删除期间防重入。tests/electron-import-smoke.cjs 在隐藏离屏 Electron 中加载包内代码与真实 FFmpeg，验证 UI/IPC/本地代理、音视频保存、预览、目录路由、取消、上游失败及原文件保护，结果通过且截图已检查。上游为替代响应，不能视为真实云端识别验收。
+发布包构建通过不代表真实云端转录已验收，CI 尚未在远端执行。

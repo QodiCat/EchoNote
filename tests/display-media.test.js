@@ -9,27 +9,36 @@ test('grants an actual desktop source and system loopback audio', async () => {
     async getSources(options) {
       assert.deepEqual(options.types, ['screen']);
       return [source];
-    }
+    },
   });
-  await handler({ videoRequested: true, audioRequested: true }, value => responses.push(value));
+  await handler({ videoRequested: true, audioRequested: true }, (value) => responses.push(value));
   assert.deepEqual(responses, [{ video: source, audio: 'loopback' }]);
   assert.equal(responses[0].video, source);
 });
 
 test('denies capture once when no screen is available', async () => {
   const responses = [];
-  const handler = createDisplayMediaHandler({ async getSources() { return []; } });
-  await handler({}, value => responses.push(value));
+  const handler = createDisplayMediaHandler({
+    async getSources() {
+      return [];
+    },
+  });
+  await handler({}, (value) => responses.push(value));
   assert.deepEqual(responses, [{}]);
 });
 
 test('handles source enumeration rejection and denies capture', async () => {
   const responses = [];
   const errors = [];
-  const handler = createDisplayMediaHandler({
-    async getSources() { throw new Error('enumeration failed'); }
-  }, message => errors.push(message));
-  await handler({}, value => responses.push(value));
+  const handler = createDisplayMediaHandler(
+    {
+      async getSources() {
+        throw new Error('enumeration failed');
+      },
+    },
+    (message) => errors.push(message),
+  );
+  await handler({}, (value) => responses.push(value));
   assert.deepEqual(responses, [{}]);
   assert.equal(errors.length, 1);
 });

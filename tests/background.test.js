@@ -13,19 +13,55 @@ function setup() {
   window.isDestroyed = () => destroyed;
   window.isMinimized = () => minimized;
   for (const name of ['hide', 'restore', 'show', 'focus']) window[name] = () => calls.push(name);
-  const close = () => { prevented = false; window.emit('close', { preventDefault() { prevented = true; } }); return prevented; };
-  app.quit = () => { app.emit('before-quit'); close(); };
+  const close = () => {
+    prevented = false;
+    window.emit('close', {
+      preventDefault() {
+        prevented = true;
+      },
+    });
+    return prevented;
+  };
+  app.quit = () => {
+    app.emit('before-quit');
+    close();
+  };
   let tray;
   class Tray extends EventEmitter {
-    constructor() { super(); tray = this; }
+    constructor() {
+      super();
+      tray = this;
+    }
     setToolTip() {}
-    setContextMenu(menu) { this.menu = menu; }
-    destroy() { calls.push('destroyTray'); }
+    setContextMenu(menu) {
+      this.menu = menu;
+    }
+    destroy() {
+      calls.push('destroyTray');
+    }
   }
-  const background = createBackground({ app, window, Tray,
-    Menu: { buildFromTemplate: items => items }, nativeImage: { createFromPath: () => ({ isEmpty: () => false }) } });
-  return { app, window, tray, calls, close, background, prevented: () => prevented,
-    minimize: () => { minimized = true; }, destroy: () => { destroyed = true; } };
+  const background = createBackground({
+    app,
+    window,
+    Tray,
+    Menu: { buildFromTemplate: (items) => items },
+    nativeImage: { createFromPath: () => ({ isEmpty: () => false }) },
+  });
+  return {
+    app,
+    window,
+    tray,
+    calls,
+    close,
+    background,
+    prevented: () => prevented,
+    minimize: () => {
+      minimized = true;
+    },
+    destroy: () => {
+      destroyed = true;
+    },
+  };
 }
 
 test('closing the window hides it without destroying the recording renderer', () => {

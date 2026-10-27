@@ -4,7 +4,7 @@ function createDisplayMediaHandler(desktopCapturer, reportError = console.error)
     try {
       const sources = await desktopCapturer.getSources({
         types: ['screen'],
-        thumbnailSize: { width: 0, height: 0 }
+        thumbnailSize: { width: 0, height: 0 },
       });
       source = sources[0];
     } catch {

@@ -30,7 +30,9 @@
 
 ## 验证
 
-`npm test` 验证代理生命周期、访问控制、凭据存储及既有录音和转录逻辑。`npm run lint` 为语法检查。tests/electron-smoke.cjs 可由 Electron 运行，传入构建后的 app.asar 路径，使用合成凭据验证真实 safeStorage 和设置界面 IPC；输出位于 dist/smoke。
+`npm test` 验证代理、凭据、录音、导入与存储逻辑；`npm run lint` 自动检查全部源码/测试语法、500 行限制和 Prettier 格式。`npm run verify` 包含 lint、单元、真实 FFmpeg 集成与两个隐藏 Electron 测试，需要先准备媒体组件。
+
+`npm run test:smoke -- dist/structure-review/win-unpacked/resources/app.asar` 验证构建包。测试仅用合成数据和替代上游，输出位于 dist/smoke 和 dist/import-smoke。受限环境不能启动 GPU 子进程时，应在普通 Windows 环境运行，不把启动失败当作通过。Windows CI 配置为 .github/workflows/verify.yml。
 
 真实系统声音、火山引擎服务权限、完整录音到保存流程仍需用户桌面验收，不能由测试或构建通过代替。
 
